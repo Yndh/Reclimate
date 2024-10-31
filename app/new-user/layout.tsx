@@ -14,19 +14,12 @@ export default function Layout({
 }>) {
   return (
     <SessionProvider>
-      <SidebarProvider>
-        <AppSidebar />
-        <main className="w-full h-screen overflow-hidden">
-          <div className="flex justify-between items-center p-2">
-            <div className="flex items-center gap-4">
-              <SidebarTrigger />
-              <AppBreadcrumb />
-            </div>
-            <ModeToggle />
-          </div>
-          {children}
-        </main>
-      </SidebarProvider>
+      <main className="w-full h-screen overflow-hidden">
+        <div className="flex items-center justify-end p-2">
+          <ModeToggle />
+        </div>
+        {children}
+      </main>
     </SessionProvider>
   );
 }

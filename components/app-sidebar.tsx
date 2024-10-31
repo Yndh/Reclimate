@@ -29,10 +29,13 @@ import {
   Calculator,
   Crown,
   AlarmSmoke,
+  ChevronsUpDown,
 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import Image from "next/image";
+import { Avatar } from "./ui/avatar";
+import { AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 
 const items = [
   {
@@ -61,13 +64,13 @@ export function AppSidebar() {
   });
 
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <div className="flex items-center m-2 w-full">
-              <p>Hakhiros 2</p>
-            </div>
+            <SidebarMenuButton>
+              <span>Hakhiros 2</span>
+            </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
@@ -95,52 +98,53 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <SidebarMenuButton className="py-7">
-                  {session?.user?.image ? (
-                    <Image
-                      src={session?.user?.image}
-                      alt="pfp"
-                      className="w-7 h-7 rounded-full mr-1"
-                      width={24}
-                      height={24}
-                    ></Image>
-                  ) : (
-                    <User2 />
-                  )}
-                  <div className="flex flex-col">
+                <SidebarMenuButton
+                  size="lg"
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                >
+                  <Avatar className="h-8 w-8 rounded-lg">
+                    <AvatarImage
+                      src={session?.user?.image as string}
+                      alt={session?.user?.name as string}
+                    />
+                    <AvatarFallback className="rounded-lg">
+                      <User2 />
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-semibold">
-                      {session?.user?.name}
+                      {session?.user?.name as string}
                     </span>
                     <span className="truncate text-xs">
-                      {session?.user?.email}
+                      {session?.user?.email as string}
                     </span>
                   </div>
-                  <ChevronUp className="ml-auto" />
+                  <ChevronsUpDown className="ml-auto size-4" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 side="top"
-                className="w-[--radix-popper-anchor-width]"
+                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
               >
-                <DropdownMenuLabel className="flex gap-3 items-center">
-                  {session?.user?.image ? (
-                    <Image
-                      src={session?.user?.image}
-                      alt="pfp"
-                      className="w-8 h-8 rounded-lg"
-                      width={24}
-                      height={24}
-                    ></Image>
-                  ) : (
-                    <User2 />
-                  )}
-                  <div className="flex flex-col">
-                    <span className="truncate font-semibold">
-                      {session?.user?.name}
-                    </span>
-                    <span className="truncate text-xs font-normal">
-                      {session?.user?.email}
-                    </span>
+                <DropdownMenuLabel className="p-0 font-normal">
+                  <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                    <Avatar className="h-8 w-8 rounded-lg">
+                      <AvatarImage
+                        src={session?.user?.image as string}
+                        alt={session?.user?.name as string}
+                      />
+                      <AvatarFallback className="rounded-lg">
+                        <User2 />
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="grid flex-1 text-left text-sm leading-tight">
+                      <span className="truncate font-semibold">
+                        {session?.user?.name as string}
+                      </span>
+                      <span className="truncate text-xs">
+                        {session?.user?.email as string}
+                      </span>
+                    </div>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
