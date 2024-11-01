@@ -17,6 +17,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { SparklesIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const chartData = [
   { date: "28.10.2024", footprint: 720 },
@@ -32,6 +33,8 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export default function CarbonPage() {
+  const router = useRouter();
+
   const getDates = (): string[] => {
     const parsedData = chartData.map((item) => ({
       ...item,
@@ -76,7 +79,7 @@ export default function CarbonPage() {
   return (
     <div className="w-full h-full p-8">
       <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-4 ">
-        <Card className="lg:col-span-2">
+        <Card className="order-2 md:order-1 lg:col-span-2">
           <CardHeader>
             <CardTitle>Postęp Śladu Węglowego</CardTitle>
             <CardDescription>
@@ -131,7 +134,7 @@ export default function CarbonPage() {
             </ChartContainer>
           </CardContent>
         </Card>
-        <div className="grid gap-4">
+        <div className="grid gap-4 order-1 md:order-2">
           <Card>
             <CardHeader>
               <CardTitle>Oblicz ślad węglowy</CardTitle>
@@ -140,13 +143,21 @@ export default function CarbonPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button>
-                Oblicz
-                <SparklesIcon />
+              <Button
+                className="hover-gradient-border p-0"
+                variant={"outline"}
+                onClick={() => {
+                  router.push("/calculate");
+                }}
+              >
+                <span className="flex items-center gap-2 w-full h-full bg-background rounded-md px-3 py-2">
+                  Oblicz
+                  <SparklesIcon />
+                </span>
               </Button>
             </CardContent>
           </Card>
-          <Card className="hidden md:hidden lg:block">
+          <Card className="hidden md:block">
             <CardHeader>
               <CardTitle>Ślad Węglowy</CardTitle>
               <CardDescription>Twój oszacowany ślad węglowy</CardDescription>

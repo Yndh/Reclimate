@@ -36,7 +36,7 @@ export const AppBreadcrumb = () => {
 
             return (
               <>
-                <BreadcrumbItem>
+                <BreadcrumbItem key={segment}>
                   {index === segments.length - 1 ? (
                     <span>{capitalize(segment)}</span>
                   ) : (

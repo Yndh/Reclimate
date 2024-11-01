@@ -126,7 +126,7 @@ const survey: Survey = {
   ],
 };
 
-export default function NewUserPage() {
+export default function CalculatePage() {
   const { data: session } = useSession({
     required: true,
     onUnauthenticated() {
@@ -138,7 +138,7 @@ export default function NewUserPage() {
   const [answers, setAnswers] = useState<Answer[]>([]);
 
   const nextStep = () => {
-    if (step < 2) {
+    if (step < 1) {
       setStep(step + 1);
     }
   };
@@ -151,32 +151,6 @@ export default function NewUserPage() {
   return (
     <div className="flex items-center justify-center w-full h-full">
       {step == 0 && (
-        <Card className="w-1/2 h-1/2">
-          <CardHeader>
-            <CardTitle>Wprowadzenie</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col justify-center items-center text-center gap-2 h-2/3">
-            <h2 className="text-xl font-bold">Witaj, {session?.user?.name}!</h2>
-            <p className="text-base text-muted-foreground">
-              „Hakhiros2" to innowacyjna aplikacja, która pomaga użytkownikom
-              zrozumieć wpływ ich stylu życia na środowisko. Dzięki
-              interaktywnym narzędziom zwiększamy świadomość ekologiczną i
-              pomagamy w podejmowaniu bardziej zrównoważonych decyzji.
-            </p>
-            <p className="text-base text-muted-foreground">
-              Aby rozpocząć, musisz wypełnić ankietę, która składa się z serii
-              pytań dotyczących Twojego stylu życia. Na podstawie Twoich
-              odpowiedzi oszacujemy Twój ślad węglowy oraz zaproponujemy
-              konkretne rekomendacje dotyczące bardziej ekologicznych wyborów.
-            </p>
-
-            <Button className="mt-4" onClick={nextStep}>
-              Wypełnij ankietę <ChevronRight />
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-      {step == 1 && (
         <Card className="w-1/2 h-1/2">
           <CardHeader>
             <CardTitle>Wprowadzenie</CardTitle>
@@ -199,7 +173,7 @@ export default function NewUserPage() {
           </CardContent>
         </Card>
       )}
-      {step === 2 && (
+      {step === 1 && (
         <AppSurvey
           survey={survey}
           answers={answers}

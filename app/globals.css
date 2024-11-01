@@ -48,6 +48,7 @@ body {
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+
   .dark {
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
@@ -88,7 +89,38 @@ body {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+}
+
+@keyframes gradient-border {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+
+.hover-gradient-border {
+  transition: border 0.3s ease;
+}
+
+.hover-gradient-border:hover {
+  border: 1px solid transparent;
+  background-image: linear-gradient(to right, #3b82f6, #9333ea, #ec4899);
+  background-size: 200% 200%;
+  animation: gradient-border 3s ease infinite;
+  background-origin: border-box;
+  -webkit-background-clip: border-box;
+  -moz-background-clip: border-box;
+  background-clip: border-box;
 }
