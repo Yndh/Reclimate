@@ -62,7 +62,7 @@ const chartData = [
 ];
 const chartConfig = {
   footprint: {
-    label: "Desktop",
+    label: "Twój",
     color: "hsl(var(--chart-1))",
   },
   country: {
@@ -263,7 +263,7 @@ export default function AppPage() {
                   <PopoverTrigger asChild>
                     <Button variant="ghost" className="h-fit mb-4">
                       <div className="flex align-top justify-start gap-4 h-fit w-full m-0">
-                        <p className="text-sm font-bold bg-green-600 rounded-full aspect-square w-12 h-12 flex items-center justify-center">
+                        <p className="text-sm text-secondary font-bold bg-green-600 rounded-full aspect-square w-12 h-12 flex items-center justify-center">
                           + {task.points}
                         </p>
                         <div className="text-left">

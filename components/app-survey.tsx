@@ -5,26 +5,44 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Progress } from "./ui/progress";
 import { SetStateAction, useState } from "react";
 import { Button } from "./ui/button";
+import { Option, Question, SurveyAnswer } from "@/app/new-user/page";
 
 interface AppSurveyProps {
-  survey: Survey;
-  answers: Answer[];
-  setAnswers: React.Dispatch<SetStateAction<Answer[]>>;
+  questions: Question[];
+  answers: SurveyAnswer[];
+  setAnswers: React.Dispatch<SetStateAction<SurveyAnswer[]>>;
   onFinish: () => void;
 }
 
 export default function AppSurvey({
-  survey,
+  questions,
   answers,
   setAnswers,
   onFinish,
 }: AppSurveyProps) {
   const [questionIndex, setQuestionIndex] = useState(0);
 
-  const handleAnswerSelection = (answer: Answer) => {
+  const handleAnswerSelection = (option: Option) => {
     setAnswers((prevAnswers) => {
+      const currentQuestionId = questions[questionIndex].id;
+
+      const existingAnswerIndex = prevAnswers.findIndex(
+        (ans) => ans.id === currentQuestionId
+      );
+
+      const newAnswer: SurveyAnswer = {
+        id: currentQuestionId,
+        option: option,
+      };
+
       const updatedAnswers = [...prevAnswers];
-      updatedAnswers[questionIndex] = answer;
+
+      if (existingAnswerIndex >= 0) {
+        updatedAnswers[existingAnswerIndex] = newAnswer;
+      } else {
+        updatedAnswers.push(newAnswer);
+      }
+
       return updatedAnswers;
     });
 
@@ -32,7 +50,7 @@ export default function AppSurvey({
   };
 
   const incrementQuestionIndex = () => {
-    if (questionIndex < survey.questions.length - 1) {
+    if (questionIndex < questions.length - 1) {
       setQuestionIndex(questionIndex + 1);
     } else {
       onFinish();
@@ -49,12 +67,12 @@ export default function AppSurvey({
         <CardTitle>Pytanie {questionIndex + 1}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col justify-center items-center text-center gap-2">
-        <Progress max={survey.questions.length} value={questionIndex + 1} />
+        <Progress max={questions.length} value={questionIndex + 1} />
         <CardTitle className="text-xl mt-4">
-          {survey.questions[questionIndex].question}
+          {questions[questionIndex].question}
         </CardTitle>
 
-        {survey.questions[questionIndex].answers.map((answer, index) => (
+        {questions[questionIndex].options.map((option, index) => (
           <label
             key={index}
             htmlFor={`answer${index}i${questionIndex}`}
@@ -65,11 +83,11 @@ export default function AppSurvey({
               id={`answer${index}i${questionIndex}`}
               name="survey"
               className="peer hidden"
-              onChange={() => handleAnswerSelection(answer)}
-              checked={answers.some((ans) => ans.id === answer.id)}
+              onChange={() => handleAnswerSelection(option)}
+              checked={answers.some((ans) => ans.option.id == option.id)}
             />
             <div className="border border-input peer-checked:bg-green-500 w-full p-2 transition duration-300 rounded-md cursor-pointer">
-              {answer.value}
+              {option.option}
             </div>
           </label>
         ))}
@@ -81,9 +99,7 @@ export default function AppSurvey({
             </Button>
           )}
           <Button className="w-full" onClick={incrementQuestionIndex}>
-            {questionIndex === survey.questions.length - 1
-              ? "Zakończ"
-              : "Następne"}
+            {questionIndex === questions.length - 1 ? "Zakończ" : "Następne"}
           </Button>
         </div>
       </CardContent>

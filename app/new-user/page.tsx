@@ -9,122 +9,27 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Progress } from "@/components/ui/progress";
-import { RadioGroupItem, RadioGroup } from "@/components/ui/radio-group";
 import { Answer, Survey } from "@/lib/types";
 import { ChevronRight } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-const survey: Survey = {
-  id: 1,
-  date: new Date(),
-  questions: [
-    {
-      id: 1,
-      question: "Ile kilometrów pokonujesz tygodniowo samochodem?",
-      answers: [
-        { id: 1, value: "Mniej niż 10 km" },
-        { id: 2, value: "10-50 km" },
-        { id: 3, value: "50-200 km" },
-        { id: 4, value: "Ponad 200 km" },
-      ],
-    },
-    {
-      id: 2,
-      question: "Jak często korzystasz z transportu publicznego?",
-      answers: [
-        { id: 5, value: "Codziennie" },
-        { id: 6, value: "Kilka razy w tygodniu" },
-        { id: 7, value: "Kilka razy w miesiącu" },
-        { id: 8, value: "Nigdy" },
-      ],
-    },
-    {
-      id: 3,
-      question: "Jaki jest główny sposób ogrzewania Twojego domu?",
-      answers: [
-        { id: 9, value: "Gaz" },
-        { id: 10, value: "Prąd" },
-        { id: 11, value: "Paliwo stałe (np. węgiel)" },
-        { id: 12, value: "Odnawialne źródła energii (np. pompy ciepła)" },
-      ],
-    },
-    {
-      id: 4,
-      question: "Ile osób mieszka w Twoim gospodarstwie domowym?",
-      answers: [
-        { id: 13, value: "1" },
-        { id: 14, value: "2" },
-        { id: 15, value: "3-4" },
-        { id: 16, value: "5 lub więcej" },
-      ],
-    },
-    {
-      id: 5,
-      question: "Jak często spożywasz mięso?",
-      answers: [
-        { id: 17, value: "Codziennie" },
-        { id: 18, value: "Kilka razy w tygodniu" },
-        { id: 18, value: "Kilka razy w miesiącu" },
-        { id: 20, value: "Nigdy" },
-      ],
-    },
-    {
-      id: 6,
-      question:
-        "Ile godzin tygodniowo korzystasz z urządzeń elektronicznych (komputer, telewizor, telefon)?",
-      answers: [
-        { id: 21, value: "Mniej niż 10 godzin" },
-        { id: 22, value: "10-20 godzin" },
-        { id: 23, value: "20-40 godzin" },
-        { id: 24, value: "Ponad 40 godzin" },
-      ],
-    },
-    {
-      id: 7,
-      question: "Ile razy w roku latasz samolotem?",
-      answers: [
-        { id: 25, value: "0 razy" },
-        { id: 26, value: "1-2 razy" },
-        { id: 27, value: "3-5 razy" },
-        { id: 28, value: "Ponad 5 razy" },
-      ],
-    },
-    {
-      id: 8,
-      question: "Czy segregujesz odpady?",
-      answers: [
-        { id: 29, value: "Tak, zawsze" },
-        { id: 30, value: "Tak, czasami" },
-        { id: 31, value: "Rzadko" },
-        { id: 32, value: "Nie" },
-      ],
-    },
-    {
-      id: 9,
-      question: "Jak często kupujesz nowe ubrania?",
-      answers: [
-        { id: 33, value: "Kilka razy w miesiącu" },
-        { id: 34, value: "Kilka razy w roku" },
-        { id: 35, value: "Raz w roku" },
-        { id: 36, value: "Rzadziej niż raz w roku" },
-      ],
-    },
-    {
-      id: 10,
-      question: "Ile litrów wody zużywasz dziennie podczas kąpieli/prysznica?",
-      answers: [
-        { id: 37, value: "Mniej niż 20 litrów" },
-        { id: 38, value: "20-50 litrów" },
-        { id: 39, value: "50-100 litrów" },
-        { id: 40, value: "Ponad 100 litrów" },
-      ],
-    },
-  ],
-};
+export interface Question {
+  id: string;
+  question: string;
+  options: Option[];
+}
+
+export interface Option {
+  id: string;
+  option: string;
+}
+
+export interface SurveyAnswer {
+  id: string;
+  option: Option;
+}
 
 export default function NewUserPage() {
   const { data: session } = useSession({
@@ -135,7 +40,30 @@ export default function NewUserPage() {
   });
   const router = useRouter();
   const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState<Answer[]>([]);
+  const [answers, setAnswers] = useState<SurveyAnswer[]>([]);
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [surveyId, setSurveyId] = useState<string>();
+
+  useEffect(() => {
+    const fetchSurveyData = async () => {
+      try {
+        const res = await fetch("/api/first-survey")
+          .then((res) => res.json())
+          .then((data) => {
+            console.log(data);
+            if (data.id) {
+              setSurveyId(data.id);
+            }
+            if (data.questions) {
+              setQuestions(data.questions);
+            }
+          });
+      } catch (e) {
+        console.log(e);
+      }
+    };
+    fetchSurveyData();
+  }, []);
 
   const nextStep = () => {
     if (step < 2) {
@@ -143,9 +71,24 @@ export default function NewUserPage() {
     }
   };
 
-  const submitHandler = () => {
-    router.replace("app?newUser=true");
+  const submitHandler = async () => {
+    // router.replace("app?newUser=true");
     console.log(answers);
+
+    try {
+      await fetch(`/api/survey/${surveyId}`, {
+        method: "POST",
+        body: JSON.stringify({
+          answers,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log(data);
+        });
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   return (
@@ -201,7 +144,7 @@ export default function NewUserPage() {
       )}
       {step === 2 && (
         <AppSurvey
-          survey={survey}
+          questions={questions}
           answers={answers}
           setAnswers={setAnswers}
           onFinish={submitHandler}
