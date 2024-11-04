@@ -18,12 +18,8 @@ import {
 } from "@/components/ui/chart";
 import { SparklesIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-
-const chartData = [
-  { date: "28.10.2024", footprint: 720 },
-  { date: "29.10.2024", footprint: 500 },
-  { date: "31.10.2024", footprint: 489 },
-];
+import { useEffect, useState } from "react";
+import { Survey, User } from "@/lib/types";
 
 const chartConfig = {
   footprint: {
@@ -32,49 +28,129 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
+interface ChartData {
+  date: Date;
+  footprint: number;
+}
+
 export default function CarbonPage() {
   const router = useRouter();
 
-  const getDates = (): string[] => {
-    const parsedData = chartData.map((item) => ({
-      ...item,
-      dateObj: new Date(item.date.split(".").reverse().join("-")),
-    }));
+  const [refreshTime, setRefreshTime] = useState<string | null>(null);
+  const [remainingTime, setRemainingTime] = useState<string | null>(null);
+  const [userData, setUserData] = useState<User>();
+  const [chartData, setChartData] = useState<ChartData[]>([]);
 
-    const lowestDate = parsedData.reduce((min, item) =>
-      item.dateObj < min.dateObj ? item : min
-    ).date;
-    const highestDate = parsedData.reduce((max, item) =>
-      item.dateObj > max.dateObj ? item : max
-    ).date;
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        await fetch("/api/user")
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.error) {
+              alert(data.error);
+              return;
+            }
+
+            if (data.user) {
+              setUserData(data.user);
+
+              const footprintData = data.user.surveys
+                .filter((survey: Survey) => survey.carbonFootprint)
+                .map((survey: Survey) => ({
+                  date: new Date(survey.createdAt),
+                  footprint: survey.carbonFootprint || 0,
+                }));
+              setChartData(footprintData);
+            }
+          });
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  useEffect(() => {
+    const fetchCooldown = async () => {
+      try {
+        await fetch("/api/survey/cooldown")
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.refreshTime) {
+              setRefreshTime(data.refreshTime);
+            }
+            if (data.available) {
+              setRefreshTime(null);
+              setRemainingTime(null);
+            }
+          });
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchCooldown();
+  }, []);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    if (refreshTime) {
+      const targetTime = new Date(refreshTime);
+
+      const updateCountdown = () => {
+        const now = new Date();
+        const timeLeft = targetTime.getTime() - now.getTime();
+
+        if (timeLeft <= 0) {
+          clearInterval(interval);
+          setRefreshTime(null);
+          setRemainingTime(null);
+        } else {
+          const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+          const minutes = Math.floor(
+            (timeLeft % (1000 * 60 * 60)) / (1000 * 60)
+          );
+          const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+          setRemainingTime(
+            `${hours.toString().padStart(2, "0")}:${minutes
+              .toString()
+              .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
+          );
+        }
+      };
+
+      updateCountdown();
+      interval = setInterval(updateCountdown, 1000);
+    }
+
+    return () => clearInterval(interval);
+  }, [refreshTime]);
+  const getDates = (): [Date, Date] => {
+    const lowestDate = chartData.reduce(
+      (min, item) => (item.date < min ? item.date : min),
+      chartData[0]?.date || new Date()
+    );
+    const highestDate = chartData.reduce(
+      (max, item) => (item.date > max ? item.date : max),
+      chartData[0]?.date || new Date()
+    );
 
     return [lowestDate, highestDate];
   };
 
-  const formatDate = (dateStr: string): string => {
-    const [day, month, year] = dateStr.split(".");
-    const months = [
-      "Styczeń",
-      "Luty",
-      "Marzec",
-      "Kwiecień",
-      "Maj",
-      "Czerwiec",
-      "Lipiec",
-      "Sierpień",
-      "Wrzesień",
-      "Październik",
-      "Listopad",
-      "Grudzień",
-    ];
-    const monthName = months[parseInt(month) - 1];
-
-    return `${day} ${monthName}`;
+  const formatDate = (date: Date): string => {
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = date.toLocaleString("pl-PL", { month: "long" });
+    return `${day} ${month}`;
   };
 
-  const dates = getDates();
-  const formattedLowestDate = formatDate(dates[0]);
-  const formattedHighestDate = formatDate(dates[1]);
+  const [lowestDate, highestDate] = getDates();
+  const formattedLowestDate = formatDate(lowestDate);
+  const formattedHighestDate = formatDate(highestDate);
 
   return (
     <div className="w-full h-full p-8">
@@ -93,7 +169,10 @@ export default function CarbonPage() {
             >
               <LineChart
                 accessibilityLayer
-                data={chartData}
+                data={chartData.map((item) => ({
+                  ...item,
+                  date: item.date.toLocaleDateString("pl-PL"),
+                }))}
                 margin={{
                   top: 20,
                   left: 12,
@@ -143,18 +222,24 @@ export default function CarbonPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button
-                className="hover-gradient-border p-0"
-                variant={"outline"}
-                onClick={() => {
-                  router.push("/calculate");
-                }}
-              >
-                <span className="flex items-center gap-2 w-full h-full bg-background rounded-md px-3 py-2">
-                  Oblicz
-                  <SparklesIcon />
-                </span>
-              </Button>
+              {remainingTime ? (
+                <Button variant={"outline"} disabled={true}>
+                  {remainingTime}
+                </Button>
+              ) : (
+                <Button
+                  className="hover-gradient-border p-0"
+                  variant={"outline"}
+                  onClick={() => {
+                    router.push("/calculate");
+                  }}
+                >
+                  <span className="flex items-center gap-2 w-full h-full bg-background rounded-md px-3 py-2">
+                    Oblicz
+                    <SparklesIcon />
+                  </span>
+                </Button>
+              )}
             </CardContent>
           </Card>
           <Card className="hidden md:block">
@@ -163,13 +248,15 @@ export default function CarbonPage() {
               <CardDescription>Twój oszacowany ślad węglowy</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-xl font-bold">500 kg CO₂</p>
+              <p className="text-xl font-bold">
+                {userData?.carbonFootprint} kg CO₂
+              </p>
             </CardContent>
           </Card>
         </div>
       </div>
       <div className="h-[300px] md:h-[400px] lg:h-full overflow-y-auto">
-        <AppTable />
+        <AppTable surveys={userData?.surveys ?? []} />
       </div>
     </div>
   );

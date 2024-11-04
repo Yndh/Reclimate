@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Survey } from "@/lib/types";
+import { error } from "console";
 import { NextApiRequest, NextApiResponse } from "next";
 import { NextResponse } from "next/server";
 
@@ -15,6 +16,8 @@ interface Option {
   option: string;
 }
 
+const SURVEY_COOLDOWN = (process.env.SURVEY_COOLDOWN ?? 0) as number; // hours
+
 export async function mGET(req: NextApiRequest, res: NextApiResponse) {
   const session = await auth();
   if (!session || !session.user) {
@@ -27,10 +30,6 @@ export async function mGET(req: NextApiRequest, res: NextApiResponse) {
   }
 
   try {
-    const user = await prisma.user.findFirst({
-      where: { id: session.user.id },
-    });
-
     const survey = await prisma.survey.findFirst({
       where: { userId: session.user.id },
       include: {
@@ -46,13 +45,23 @@ export async function mGET(req: NextApiRequest, res: NextApiResponse) {
       },
     });
 
-    if ((user?.carbonFootprint as number) > 0) {
-      return new NextResponse(
-        JSON.stringify({ error: `You can't access this survey` }),
-        {
-          status: 403,
-        }
+    if (survey) {
+      const surveyCreatedAt = new Date(survey.createdAt);
+      const refreshTime = new Date(
+        surveyCreatedAt.getTime() + SURVEY_COOLDOWN * 60 * 60 * 1000
       );
+
+      if (Date.now() < refreshTime.getTime()) {
+        return new NextResponse(
+          JSON.stringify({
+            error: "You need to wait to ",
+            refreshTime: refreshTime.toISOString,
+          }),
+          {
+            status: 429,
+          }
+        );
+      }
     }
 
     const questions: Question[] = [

@@ -29,94 +29,85 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Survey } from "@/lib/types";
 
-const data: CarbonHistory[] = [
-  {
-    id: "1",
-    date: new Date(),
-    questions: 10,
-    carbon: 489,
-  },
-  {
-    id: "2",
-    date: new Date("2024-10-29"),
-    questions: 10,
-    carbon: 500,
-  },
-];
-
-export type CarbonHistory = {
+export type SurveyData = {
   id: string;
-  date: Date;
+  createdAt: Date;
   questions: number;
-  carbon: number;
+  carbonFootprint: number;
 };
 
 const names = {
   id: "Numer",
-  date: "data",
+  createdAt: "Data ankiety",
   questions: "Pytania",
-  carbon: "ślad węglowy",
+  carbonFootprint: "Ślad węglowy",
 };
 
-export const columns: ColumnDef<CarbonHistory>[] = [
+export const columns: ColumnDef<SurveyData>[] = [
   {
     accessorKey: "id",
-    header: "No.",
+    header: "Id",
     cell: ({ row }) => <div className="capitalize">{row.getValue("id")}</div>,
   },
   {
-    accessorKey: "date",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Data
-          <CaretSortIcon className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
+    accessorKey: "createdAt",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Data ankiety
+        <CaretSortIcon className="ml-2 h-4 w-4" />
+      </Button>
+    ),
     cell: ({ row }) => (
       <div className="lowercase">
         {new Intl.DateTimeFormat("pl-PL", {
           year: "numeric",
           month: "2-digit",
           day: "2-digit",
-        }).format(new Date(row.getValue("date")))}
+        }).format(new Date(row.getValue("createdAt")))}
       </div>
     ),
   },
   {
     accessorKey: "questions",
     header: () => <div className="text-right">Pytania</div>,
-    cell: ({ row }) => {
-      return (
-        <div className="text-right font-medium">
-          {row.getValue("questions")}
-        </div>
-      );
-    },
+    cell: ({ row }) => (
+      <div className="text-right font-medium">{row.getValue("questions")}</div>
+    ),
   },
   {
-    accessorKey: "carbon",
+    accessorKey: "carbonFootprint",
     header: () => <div className="text-right">Ślad węglowy</div>,
-    cell: ({ row }) => {
-      return (
-        <div className="text-right font-medium">
-          {row.getValue("carbon")} kg CO₂
-        </div>
-      );
-    },
+    cell: ({ row }) => (
+      <div className="text-right font-medium">
+        {row.getValue("carbonFootprint")
+          ? `${row.getValue("carbonFootprint")} kg CO₂`
+          : "N/A"}
+      </div>
+    ),
   },
 ];
 
-export function AppTable() {
+interface SurveyTableProps {
+  surveys: Survey[];
+}
+
+export function AppTable({ surveys }: SurveyTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
+
+  const data: SurveyData[] = surveys.map((survey) => ({
+    id: survey.id,
+    createdAt: survey.createdAt,
+    questions: survey.responses.length ?? 0,
+    carbonFootprint: survey.carbonFootprint ?? 0,
+  }));
 
   const table = useReactTable({
     data,

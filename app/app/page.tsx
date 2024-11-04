@@ -1,6 +1,6 @@
 "use client";
 
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
+import { CartesianGrid, LabelList, Line, LineChart, XAxis } from "recharts";
 import {
   Card,
   CardContent,
@@ -21,85 +21,82 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useEffect, useState } from "react";
+import { Survey, User } from "@/lib/types";
 
-const chartData = [
-  {
-    month: "January",
-    footprint: 1200,
-    country: 833,
-    global: 400,
-  },
-  {
-    month: "February",
-    footprint: 1300,
-    country: 800,
-    global: 420,
-  },
-  {
-    month: "March",
-    footprint: 1250,
-    country: 850,
-    global: 410,
-  },
-  {
-    month: "April",
-    footprint: 1100,
-    country: 780,
-    global: 405,
-  },
-  {
-    month: "May",
-    footprint: 1300,
-    country: 820,
-    global: 415,
-  },
-  {
-    month: "June",
-    footprint: 1270,
-    country: 870,
-    global: 425,
-  },
-];
 const chartConfig = {
   footprint: {
-    label: "Twój",
+    label: "Ślad węglowy: ",
     color: "hsl(var(--chart-1))",
-  },
-  country: {
-    label: "Polska",
-    color: "hsl(var(--chart-2))",
-  },
-  global: {
-    label: "Globalnie",
-    color: "hsl(var(--chart-3))",
   },
 } satisfies ChartConfig;
 
-const weeklyTasks = [
-  {
-    title: "Redukcja jedzenia mięsnego",
-    description: "Zrezygnuj z mięsa przynajmniej przez jeden dzień w tygodniu.",
-    points: 150,
-  },
-  {
-    title: "Ograniczenie zużycia plastiku",
-    description:
-      "Staraj się ograniczyć jednorazowy plastik przez cały tydzień.",
-    points: 200,
-  },
-  {
-    title: "Używanie transportu publicznego lub roweru",
-    description:
-      "Korzystaj z transportu publicznego lub roweru zamiast samochodu.",
-    points: 300,
-  },
-];
+interface ChartData {
+  date: Date;
+  footprint: number;
+}
 
 export default function AppPage() {
   const { data: session } = useSession({
     required: true,
     onUnauthenticated() {},
   });
+  const [userData, setUserData] = useState<User>();
+  const [chartData, setChartData] = useState<ChartData[]>([]);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        await fetch("/api/user")
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.error) {
+              alert(data.error);
+              return;
+            }
+
+            if (data.user) {
+              setUserData(data.user);
+
+              const footprintData = data.user.surveys
+                .filter((survey: Survey) => survey.carbonFootprint)
+                .map((survey: Survey) => ({
+                  date: new Date(survey.createdAt),
+                  footprint: survey.carbonFootprint || 0,
+                }));
+              setChartData(footprintData);
+            }
+          });
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  const getDates = (): [Date, Date] => {
+    const lowestDate = chartData.reduce(
+      (min, item) => (item.date < min ? item.date : min),
+      chartData[0]?.date || new Date()
+    );
+    const highestDate = chartData.reduce(
+      (max, item) => (item.date > max ? item.date : max),
+      chartData[0]?.date || new Date()
+    );
+
+    return [lowestDate, highestDate];
+  };
+
+  const formatDate = (date: Date): string => {
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = date.toLocaleString("pl-PL", { month: "long" });
+    return `${day} ${month}`;
+  };
+
+  const [lowestDate, highestDate] = getDates();
+  const formattedLowestDate = formatDate(lowestDate);
+  const formattedHighestDate = formatDate(highestDate);
 
   return (
     <div className="flex flex-col items-center w-full h-full p-8 pb-12 gap-6 box-border">
@@ -114,7 +111,9 @@ export default function AppPage() {
               <CardDescription>Twój oszacowany ślad węglowy</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">500 kg CO₂</p>
+              <p className="text-2xl font-bold">
+                {userData?.carbonFootprint} kg CO₂
+              </p>
               <span className="text-xs text-muted-foreground">
                 -200kg od ostatniego tygodnia
               </span>
@@ -126,7 +125,7 @@ export default function AppPage() {
               <CardDescription>Ilość punktów</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">400</p>
+              <p className="text-2xl font-bold">{userData?.points}</p>
             </CardContent>
           </Card>
           <Card>
@@ -144,9 +143,9 @@ export default function AppPage() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 w-full">
           <Card className="md:col-span-1 lg:col-span-2">
             <CardHeader>
-              <CardTitle>Wykres Śladu Węglowego</CardTitle>
+              <CardTitle>Postęp Śladu Węglowego</CardTitle>
               <CardDescription>
-                Twój ślad węglowy na tle krajowym i światowym
+                {formattedLowestDate} - {formattedHighestDate}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -154,101 +153,49 @@ export default function AppPage() {
                 config={chartConfig}
                 className="max-h-[400px] w-full"
               >
-                <AreaChart
+                <LineChart
                   accessibilityLayer
-                  data={chartData}
+                  data={chartData.map((item) => ({
+                    ...item,
+                    date: item.date.toLocaleDateString("pl-PL"),
+                  }))}
                   margin={{
+                    top: 20,
                     left: 12,
                     right: 12,
                   }}
                 >
                   <CartesianGrid vertical={false} />
                   <XAxis
-                    dataKey="month"
+                    dataKey="date"
                     tickLine={false}
                     axisLine={false}
                     tickMargin={8}
-                    tickFormatter={(value) => value.slice(0, 3)}
                   />
                   <ChartTooltip
                     cursor={false}
-                    content={<ChartTooltipContent />}
+                    content={<ChartTooltipContent indicator="line" />}
                   />
-                  <defs>
-                    <linearGradient
-                      id="fillFootprint"
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
-                      <stop
-                        offset="5%"
-                        stopColor="var(--color-footprint)"
-                        stopOpacity={0.8}
-                      />
-                      <stop
-                        offset="95%"
-                        stopColor="var(--color-footprint)"
-                        stopOpacity={0.1}
-                      />
-                    </linearGradient>
-                    <linearGradient
-                      id="fillCountry"
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
-                      <stop
-                        offset="5%"
-                        stopColor="var(--color-country)"
-                        stopOpacity={0.8}
-                      />
-                      <stop
-                        offset="95%"
-                        stopColor="var(--color-country)"
-                        stopOpacity={0.1}
-                      />
-                    </linearGradient>
-                    <linearGradient id="fillGlobal" x1="0" y1="0" x2="0" y2="1">
-                      <stop
-                        offset="5%"
-                        stopColor="var(--color-global)"
-                        stopOpacity={0.8}
-                      />
-                      <stop
-                        offset="95%"
-                        stopColor="var(--color-global)"
-                        stopOpacity={0.1}
-                      />
-                    </linearGradient>
-                  </defs>
-                  <Area
+                  <Line
                     dataKey="footprint"
                     type="natural"
-                    fill="url(#fillFootprint)"
-                    fillOpacity={0.4}
-                    stroke="var(--color-footrpint)"
-                    stackId="a"
-                  />
-                  <Area
-                    dataKey="country"
-                    type="natural"
-                    fill="url(#fillCountry)"
-                    fillOpacity={0.4}
-                    stroke="var(--color-country)"
-                    stackId="a"
-                  />
-                  <Area
-                    dataKey="global"
-                    type="natural"
-                    fill="url(#fillGlobal)"
-                    fillOpacity={0.4}
-                    stroke="var(--color-global)"
-                    stackId="a"
-                  />
-                </AreaChart>
+                    stroke="var(--color-footprint)"
+                    strokeWidth={2}
+                    dot={{
+                      fill: "var(--color-footprint)",
+                    }}
+                    activeDot={{
+                      r: 6,
+                    }}
+                  >
+                    <LabelList
+                      position="top"
+                      offset={12}
+                      className="fill-foreground"
+                      fontSize={12}
+                    />
+                  </Line>
+                </LineChart>
               </ChartContainer>
             </CardContent>
           </Card>
@@ -258,42 +205,48 @@ export default function AppPage() {
               <CardDescription>Twoje zadania na ten tydzień</CardDescription>
             </CardHeader>
             <CardContent>
-              {weeklyTasks.map((task, index) => (
-                <Popover key={index}>
-                  <PopoverTrigger asChild>
-                    <Button variant="ghost" className="h-fit mb-4">
-                      <div className="flex align-top justify-start gap-4 h-fit w-full m-0">
-                        <p className="text-sm text-secondary font-bold bg-green-600 rounded-full aspect-square w-12 h-12 flex items-center justify-center">
-                          + {task.points}
-                        </p>
-                        <div className="text-left">
-                          <p className="text-lg font-semibold text-wrap">
-                            {task.title}
+              {userData?.challenges && userData.challenges.length > 0 ? (
+                userData?.challenges.map((challenge, index) => (
+                  <Popover key={index}>
+                    <PopoverTrigger asChild>
+                      <Button variant="ghost" className="h-fit mb-4">
+                        <div className="flex align-top justify-start gap-4 h-fit w-full m-0">
+                          <p className="text-sm text-secondary font-bold bg-green-600 rounded-full aspect-square w-12 h-12 flex items-center justify-center">
+                            + {challenge.point}
                           </p>
-                          <p className="text-sm text-muted-foreground text-wrap">
-                            {task.description}
+                          <div className="text-left">
+                            <p className="text-lg font-semibold text-wrap">
+                              {challenge.title}
+                            </p>
+                            <p className="text-sm text-muted-foreground text-wrap">
+                              {challenge.description}
+                            </p>
+                          </div>
+                        </div>
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent>
+                      <div className="grid gap-4">
+                        <div className="space-y-2">
+                          <h4 className="font-medium leading-none">
+                            {challenge.title}
+                          </h4>
+                          <p className="text-sm text-muted-foreground">
+                            {challenge.description}
                           </p>
                         </div>
+                        <div className="grid gap-2">
+                          <Button>Oznacz jako ukończone</Button>
+                        </div>
                       </div>
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent>
-                    <div className="grid gap-4">
-                      <div className="space-y-2">
-                        <h4 className="font-medium leading-none">
-                          {task.title}
-                        </h4>
-                        <p className="text-sm text-muted-foreground">
-                          {task.description}
-                        </p>
-                      </div>
-                      <div className="grid gap-2">
-                        <Button>Oznacz jako ukończone</Button>
-                      </div>
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              ))}
+                    </PopoverContent>
+                  </Popover>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Narazie nie masz żadnych wyzwań
+                </p>
+              )}
             </CardContent>
           </Card>
         </div>

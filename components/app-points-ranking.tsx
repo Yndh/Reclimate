@@ -5,7 +5,6 @@ import { CaretSortIcon } from "@radix-ui/react-icons";
 import {
   ColumnDef,
   SortingState,
-  VisibilityState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -24,78 +23,20 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-const data: Leaderboard[] = [
-  {
-    username: "Yndh",
-    points: 400,
-  },
-  {
-    username: "Alex",
-    points: 300,
-  },
-  {
-    username: "Zara",
-    points: 250,
-  },
-  {
-    username: "Zara",
-    points: 250,
-  },
-];
-
-export type Leaderboard = {
-  username: string;
+export interface Leaderboard {
+  name: string;
   points: number;
-};
+}
 
-const sortedData = [...data].sort((a, b) => b.points - a.points);
+interface AppRankingProps {
+  data: Leaderboard[];
+}
 
-export const columns: ColumnDef<Leaderboard>[] = [
-  {
-    accessorKey: "rank",
-    header: "Miejsce",
-    cell: ({ row }) => {
-      const rank = row.index + 1;
-      const medalEmoji =
-        rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : "\u00A0";
-      return (
-        <div>
-          {medalEmoji} {rank}
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "username",
-    header: "Nazwa użytkownika",
-    cell: ({ row }) => (
-      <div className=" font-medium">{row.getValue("username")}</div>
-    ),
-  },
-  {
-    accessorKey: "points",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Punkty
-          <CaretSortIcon className="ml-2 h-4 w-2" />
-        </Button>
-      );
-    },
-    cell: ({ row }) => (
-      <div className="lowercase ml-4">{row.getValue("points")}</div>
-    ),
-  },
-];
-
-export function AppRanking() {
+export function AppRanking({ data }: AppRankingProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
   const table = useReactTable({
-    data: sortedData,
+    data,
     columns,
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
@@ -114,18 +55,16 @@ export function AppRanking() {
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  );
-                })}
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>
@@ -186,3 +125,45 @@ export function AppRanking() {
     </div>
   );
 }
+
+// Define columns for the table
+export const columns: ColumnDef<Leaderboard>[] = [
+  {
+    accessorKey: "rank",
+    header: "Miejsce",
+    cell: ({ row }) => {
+      const rank = row.index + 1;
+      const medalEmoji =
+        rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : "\u00A0";
+      return (
+        <div>
+          {medalEmoji} {rank}
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "name",
+    header: "Nazwa użytkownika",
+    cell: ({ row }) => (
+      <div className="font-medium">{row.getValue("name")}</div>
+    ),
+  },
+  {
+    accessorKey: "points",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Punkty
+          <CaretSortIcon className="ml-2 h-4 w-2" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => (
+      <div className="lowercase ml-4">{row.getValue("points")}</div>
+    ),
+  },
+];

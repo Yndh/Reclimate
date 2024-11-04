@@ -34,6 +34,24 @@ export async function mPOST(req: Request, res: ResponseInterface) {
       }
     );
   }
+  const survey = await prisma.survey.findFirst({
+    where: { id: surveyId },
+  });
+
+  if (!survey) {
+    return new NextResponse(JSON.stringify({ error: "Survey doesnt exist" }), {
+      status: 400,
+    });
+  }
+
+  if ((survey.carbonFootprint ?? 0) > 0) {
+    return new NextResponse(
+      JSON.stringify({ error: "You can't edit this survey" }),
+      {
+        status: 403,
+      }
+    );
+  }
 
   const body: SendSurveyReqBody = await req.json();
   const { answers } = body;
@@ -59,30 +77,24 @@ export async function mPOST(req: Request, res: ResponseInterface) {
   }
 
   try {
-    await prisma.$transaction(
-      answers.map((answer) => {
-        return prisma.response.update({
-          where: { id: answer.id },
-          data: {
-            answer: {
-              connect: {
-                id: answer.option.id,
-              },
-            },
-          },
-          include: {
-            answer: true,
-          },
-        });
-      })
-    );
-
     const footprint = 500; //later update this using AI
 
     const survey = await prisma.survey.update({
       where: { id: surveyId },
       data: {
         carbonFootprint: footprint, //temp
+        responses: {
+          update: answers.map((answer) => ({
+            where: { id: answer.id },
+            data: {
+              answer: {
+                connect: {
+                  id: answer.option.id,
+                },
+              },
+            },
+          })),
+        },
       },
       include: {
         responses: {

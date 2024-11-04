@@ -1,6 +1,6 @@
 "use client";
 
-import AppSurvey from "@/components/app-survey";
+import AppSurvey from "@/components/survey";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -56,6 +56,9 @@ export default function NewUserPage() {
             }
             if (data.questions) {
               setQuestions(data.questions);
+            }
+            if (data.error) {
+              router.replace("/app");
             }
           });
       } catch (e) {
