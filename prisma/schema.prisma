@@ -18,7 +18,7 @@ model User {
   surveys         Survey[]    @relation(name: "UserSurveys")
   challenges      Challenge[]
   points          Int         @default(0)
-  carbonFootprint Int?
+  carbonFootprint Float?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -68,7 +68,7 @@ model Survey {
   userId          String
   user            User       @relation(name: "UserSurveys", fields: [userId], references: [id])
   responses       Response[]
-  carbonFootprint Int?
+  carbonFootprint Float?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

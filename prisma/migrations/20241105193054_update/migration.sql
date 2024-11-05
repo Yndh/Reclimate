@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "Survey" ALTER COLUMN "carbonFootprint" SET DATA TYPE DOUBLE PRECISION;
+
+-- AlterTable
+ALTER TABLE "User" ALTER COLUMN "carbonFootprint" SET DATA TYPE DOUBLE PRECISION;

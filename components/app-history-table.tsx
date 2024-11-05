@@ -85,7 +85,7 @@ export const columns: ColumnDef<SurveyData>[] = [
     cell: ({ row }) => (
       <div className="text-right font-medium">
         {row.getValue("carbonFootprint")
-          ? `${row.getValue("carbonFootprint")} kg CO₂`
+          ? `${row.getValue("carbonFootprint")}t CO₂`
           : "N/A"}
       </div>
     ),

@@ -30,6 +30,7 @@
     "next": "14.2.16",
     "next-auth": "^5.0.0-beta.25",
     "next-themes": "^0.3.0",
+    "openai": "^4.71.0",
     "react": "^18",
     "react-dom": "^18",
     "recharts": "^2.13.0",

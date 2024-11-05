@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/popover";
 import { useEffect, useState } from "react";
 import { Survey, User } from "@/lib/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const chartConfig = {
   footprint: {
@@ -111,12 +112,13 @@ export default function AppPage() {
               <CardDescription>Twój oszacowany ślad węglowy</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">
-                {userData?.carbonFootprint} kg CO₂
-              </p>
-              <span className="text-xs text-muted-foreground">
-                -200kg od ostatniego tygodnia
-              </span>
+              {userData?.carbonFootprint != null ? (
+                <p className="text-2xl font-bold">
+                  {userData?.carbonFootprint}t CO₂
+                </p>
+              ) : (
+                <Skeleton className="w-[80px] h-[30px]" />
+              )}
             </CardContent>
           </Card>
           <Card>
@@ -125,7 +127,11 @@ export default function AppPage() {
               <CardDescription>Ilość punktów</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">{userData?.points}</p>
+              {userData?.points != null ? (
+                <p className="text-2xl font-bold">{userData?.points}</p>
+              ) : (
+                <Skeleton className="w-[80px] h-[30px]" />
+              )}
             </CardContent>
           </Card>
           <Card>

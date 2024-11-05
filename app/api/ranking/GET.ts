@@ -6,7 +6,7 @@ export async function mGET(req: NextApiRequest, res: NextApiResponse) {
   try {
     const users = await prisma.user.findMany({
       orderBy: {
-        points: "asc",
+        points: "desc",
       },
       select: {
         name: true,

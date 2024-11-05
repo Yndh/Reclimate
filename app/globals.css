@@ -109,6 +109,23 @@ body {
   }
 }
 
+@keyframes explosion {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(2.5);
+    opacity: 0.05;
+  }
+
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
 
 .hover-gradient-border {
   transition: border 0.3s ease;
@@ -123,4 +140,29 @@ body {
   -webkit-background-clip: border-box;
   -moz-background-clip: border-box;
   background-clip: border-box;
+}
+
+.gradient-border-box {
+  position: relative;
+}
+
+.gradient-border-box .gradient {
+  content: '';
+  position: absolute;
+  margin: 10px;
+  filter: blur(20px);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to right, #3b82f6, #9333ea, #ec4899);
+  z-index: -1;
+  background-size: 300% 300%;
+  animation: gradient-border 3s ease infinite;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+}
+
+.gradient-border-box .gradient.finish {
+  animation: explosion 1s ease forwards;
+
 }

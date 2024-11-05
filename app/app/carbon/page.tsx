@@ -20,10 +20,11 @@ import { SparklesIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Survey, User } from "@/lib/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const chartConfig = {
   footprint: {
-    label: "Footprint",
+    label: "Ślad węglowy: ",
     color: "hsl(var(--chart-1))",
   },
 } satisfies ChartConfig;
@@ -222,23 +223,27 @@ export default function CarbonPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {remainingTime ? (
-                <Button variant={"outline"} disabled={true}>
-                  {remainingTime}
-                </Button>
+              {remainingTime != undefined ? (
+                remainingTime ? (
+                  <Button variant={"outline"} disabled={true}>
+                    {remainingTime}
+                  </Button>
+                ) : (
+                  <Button
+                    className="hover-gradient-border p-0"
+                    variant={"outline"}
+                    onClick={() => {
+                      router.push("/calculate");
+                    }}
+                  >
+                    <span className="flex items-center gap-2 w-full h-full bg-background rounded-md px-3 py-2">
+                      Oblicz
+                      <SparklesIcon />
+                    </span>
+                  </Button>
+                )
               ) : (
-                <Button
-                  className="hover-gradient-border p-0"
-                  variant={"outline"}
-                  onClick={() => {
-                    router.push("/calculate");
-                  }}
-                >
-                  <span className="flex items-center gap-2 w-full h-full bg-background rounded-md px-3 py-2">
-                    Oblicz
-                    <SparklesIcon />
-                  </span>
-                </Button>
+                <Skeleton className="w-[80px] h-[35px]" />
               )}
             </CardContent>
           </Card>
@@ -248,9 +253,13 @@ export default function CarbonPage() {
               <CardDescription>Twój oszacowany ślad węglowy</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-xl font-bold">
-                {userData?.carbonFootprint} kg CO₂
-              </p>
+              {userData?.carbonFootprint != null ? (
+                <p className="text-xl font-bold">
+                  {userData?.carbonFootprint}t CO₂
+                </p>
+              ) : (
+                <Skeleton className="w-[80px] h-[30px]" />
+              )}
             </CardContent>
           </Card>
         </div>

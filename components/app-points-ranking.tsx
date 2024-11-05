@@ -126,7 +126,6 @@ export function AppRanking({ data }: AppRankingProps) {
   );
 }
 
-// Define columns for the table
 export const columns: ColumnDef<Leaderboard>[] = [
   {
     accessorKey: "rank",

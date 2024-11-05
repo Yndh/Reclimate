@@ -1,5 +1,6 @@
 import { SurveyAnswer } from "@/app/new-user/page";
 import { auth } from "@/lib/auth";
+import { calculateFootprint } from "@/lib/calculateFootprint";
 import { prisma } from "@/lib/prisma";
 import { NextApiResponse } from "next";
 import { NextResponse } from "next/server";
@@ -36,6 +37,13 @@ export async function mPOST(req: Request, res: ResponseInterface) {
   }
   const survey = await prisma.survey.findFirst({
     where: { id: surveyId },
+    include: {
+      responses: {
+        include: {
+          answers: true,
+        },
+      },
+    },
   });
 
   if (!survey) {
@@ -74,12 +82,50 @@ export async function mPOST(req: Request, res: ResponseInterface) {
         }
       );
     }
+
+    const response = survey.responses.find((resp) => resp.id == answer.id);
+    if (!response) {
+      return new NextResponse(
+        JSON.stringify({
+          error: `Response ID ${answer.id} does not correspond to any valid response in the survey.`,
+        }),
+        {
+          status: 400,
+        }
+      );
+    }
+    const isValidOption = response.answers.find(
+      (ans) => ans.id === answer.option.id
+    );
+    if (!isValidOption) {
+      return new NextResponse(
+        JSON.stringify({
+          error: `Option ID ${answer.option.id} is not valid for response ID ${answer.id}.`,
+        }),
+        {
+          status: 400,
+        }
+      );
+    }
   }
 
   try {
-    const footprint = 500; //later update this using AI
+    const surveyAnswers = survey.responses.map((response) => {
+      const selectedAnswer = answers.find((ans) => ans.id === response.id);
+      return {
+        question: response.question as string,
+        selectedAnswer: selectedAnswer?.option.option as string,
+      };
+    });
 
-    const survey = await prisma.survey.update({
+    const response = await calculateFootprint(surveyAnswers);
+    // const response = {
+    //   footprint: 3.5,
+    //   tips: [],
+    // };
+    const { footprint, tips } = response;
+
+    const updatedSurvey = await prisma.survey.update({
       where: { id: surveyId },
       data: {
         carbonFootprint: footprint, //temp
@@ -114,7 +160,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
 
     return new NextResponse(
       JSON.stringify({
-        survey: survey,
+        survey: updatedSurvey,
       }),
       {
         status: 200,
