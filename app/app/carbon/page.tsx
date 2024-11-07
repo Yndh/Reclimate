@@ -39,6 +39,7 @@ export default function CarbonPage() {
 
   const [refreshTime, setRefreshTime] = useState<string | null>(null);
   const [remainingTime, setRemainingTime] = useState<string | null>(null);
+  const [cooldownLoading, setCooldownLoading] = useState(true);
   const [userData, setUserData] = useState<User>();
   const [chartData, setChartData] = useState<ChartData[]>([]);
 
@@ -79,6 +80,7 @@ export default function CarbonPage() {
         await fetch("/api/survey/cooldown")
           .then((res) => res.json())
           .then((data) => {
+            setCooldownLoading(false);
             if (data.refreshTime) {
               setRefreshTime(data.refreshTime);
             }
@@ -223,7 +225,7 @@ export default function CarbonPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {remainingTime != undefined ? (
+              {!cooldownLoading ? (
                 remainingTime ? (
                   <Button variant={"outline"} disabled={true}>
                     {remainingTime}

@@ -22,8 +22,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useEffect, useState } from "react";
-import { Survey, User } from "@/lib/types";
+import { Challenge, Survey, User } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useRouter } from "next/navigation";
+import { Check, CheckCircle2 } from "lucide-react";
 
 const chartConfig = {
   footprint: {
@@ -44,6 +46,11 @@ export default function AppPage() {
   });
   const [userData, setUserData] = useState<User>();
   const [chartData, setChartData] = useState<ChartData[]>([]);
+  const [challengesRefresh, setChallengesRefresh] = useState("");
+  const [completeLeftRefresh, setCompleteLeftRefresh] = useState<string | null>(
+    null
+  );
+  const router = useRouter();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -57,6 +64,7 @@ export default function AppPage() {
             }
 
             if (data.user) {
+              console.log(data);
               setUserData(data.user);
 
               const footprintData = data.user.surveys
@@ -75,6 +83,95 @@ export default function AppPage() {
 
     fetchUser();
   }, []);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (!userData) {
+      return;
+    }
+
+    const target = new Date(userData?.challenges[0].endDate);
+
+    const updateCountdown = () => {
+      const now = new Date();
+
+      const timeLeft = target.getTime() - now.getTime();
+
+      const completeDate = new Date(target.getTime() - 1 * 24 * 60 * 60 * 1000);
+      const completeTimeLeft = completeDate.getTime() - now.getTime();
+
+      if (timeLeft <= 0) {
+        router.refresh();
+      } else if (completeTimeLeft <= 0) {
+        setCompleteLeftRefresh(null);
+      } else {
+        let days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+        let hours = Math.floor((timeLeft / (1000 * 60 * 60)) % 24);
+        let minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+        let seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+        setChallengesRefresh(
+          `${days.toString().padStart(2, "0")}:${hours
+            .toString()
+            .padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds
+            .toString()
+            .padStart(2, "0")}`
+        );
+
+        days = Math.floor(completeTimeLeft / (1000 * 60 * 60 * 24));
+        hours = Math.floor((completeTimeLeft / (1000 * 60 * 60)) % 24);
+        minutes = Math.floor(
+          (completeTimeLeft % (1000 * 60 * 60)) / (1000 * 60)
+        );
+        seconds = Math.floor((completeTimeLeft % (1000 * 60)) / 1000);
+
+        setCompleteLeftRefresh(
+          `${days.toString().padStart(2, "0")}:${hours
+            .toString()
+            .padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds
+            .toString()
+            .padStart(2, "0")}`
+        );
+      }
+    };
+
+    updateCountdown();
+    interval = setInterval(updateCountdown, 1000);
+  }, [userData]);
+
+  const updateChallenge = async (id: string) => {
+    try {
+      await fetch(`/api/challenges/${id}`, {
+        method: "POST",
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.error) {
+            alert(data.error);
+            return;
+          }
+
+          if (data.challenge) {
+            setUserData((user) => {
+              if (user && user.id) {
+                return {
+                  ...user,
+                  points: user.points + data.challenge.points,
+                  challenges: user.challenges?.map((chall) =>
+                    chall.id === id
+                      ? { ...chall, ...(data.challenge as Challenge) }
+                      : chall
+                  ),
+                };
+              }
+              return user;
+            });
+          }
+        });
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const getDates = (): [Date, Date] => {
     const lowestDate = chartData.reduce(
@@ -206,9 +303,19 @@ export default function AppPage() {
             </CardContent>
           </Card>
           <Card>
-            <CardHeader>
-              <CardTitle>Zadania tygodniowe</CardTitle>
-              <CardDescription>Twoje zadania na ten tydzień</CardDescription>
+            <CardHeader className="flex flex-row justify-between">
+              <div>
+                <CardTitle>Zadania tygodniowe</CardTitle>
+                <CardDescription>Twoje zadania na ten tydzień</CardDescription>
+              </div>
+
+              {challengesRefresh ? (
+                <span className="text-sm text-muted-foreground">
+                  {challengesRefresh}
+                </span>
+              ) : (
+                <Skeleton className="h-[14px] w-[30px]" />
+              )}
             </CardHeader>
             <CardContent>
               {userData?.challenges && userData.challenges.length > 0 ? (
@@ -217,14 +324,26 @@ export default function AppPage() {
                     <PopoverTrigger asChild>
                       <Button variant="ghost" className="h-fit mb-4">
                         <div className="flex align-top justify-start gap-4 h-fit w-full m-0">
-                          <p className="text-sm text-secondary font-bold bg-green-600 rounded-full aspect-square w-12 h-12 flex items-center justify-center">
-                            + {challenge.point}
+                          <p className="text-sm text-white font-bold bg-green-600 rounded-full aspect-square w-12 h-12 flex items-center justify-center">
+                            {challenge.isCompleted ? (
+                              <Check />
+                            ) : (
+                              `+ ${challenge.points}`
+                            )}
                           </p>
                           <div className="text-left">
-                            <p className="text-lg font-semibold text-wrap">
+                            <p
+                              className={`text-lg font-semibold text-wrap ${
+                                challenge.isCompleted && "line-through"
+                              }`}
+                            >
                               {challenge.title}
                             </p>
-                            <p className="text-sm text-muted-foreground text-wrap">
+                            <p
+                              className={`text-sm text-muted-foreground text-wrap ${
+                                challenge.isCompleted && "line-through"
+                              }`}
+                            >
                               {challenge.description}
                             </p>
                           </div>
@@ -242,16 +361,40 @@ export default function AppPage() {
                           </p>
                         </div>
                         <div className="grid gap-2">
-                          <Button>Oznacz jako ukończone</Button>
+                          {challenge.isCompleted ? (
+                            <Button variant={"outline"}>
+                              <CheckCircle2 /> Ukończone
+                            </Button>
+                          ) : completeLeftRefresh ? (
+                            <Button disabled>{completeLeftRefresh}</Button>
+                          ) : (
+                            <Button
+                              onClick={() => updateChallenge(challenge.id)}
+                            >
+                              Oznacz jako ukończone
+                            </Button>
+                          )}
                         </div>
                       </div>
                     </PopoverContent>
                   </Popover>
                 ))
               ) : (
-                <p className="text-sm text-muted-foreground">
-                  Narazie nie masz żadnych wyzwań
-                </p>
+                <>
+                  {[...Array(3)].map((_, index) => (
+                    <div
+                      key={index}
+                      className="flex align-top justify-start gap-4 h-fit w-full m-0 mb-4"
+                    >
+                      <Skeleton className="!w-12 !h-12 aspect-square rounded-full" />
+                      <div className="w-full">
+                        <Skeleton className="h-[18px] w-11/12 mb-2" />
+                        <Skeleton className="h-[14px] w-full mb-1" />
+                        <Skeleton className="h-[14px] w-full mb-1" />
+                      </div>
+                    </div>
+                  ))}
+                </>
               )}
             </CardContent>
           </Card>

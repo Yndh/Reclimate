@@ -53,7 +53,7 @@ export interface Challenge {
   user: User;
   title: string;
   description: string;
-  point: number;
+  points: number;
   isCompleted: boolean;
   startDate: Date;
   endDate: Date;
