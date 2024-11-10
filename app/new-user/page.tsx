@@ -136,7 +136,7 @@ export default function NewUserPage() {
   return (
     <div className="flex items-center justify-center w-full h-full">
       {step == 0 && (
-        <Card className="w-1/2 h-1/2">
+        <Card className="w-full h-fit md:h-1/2 md:w-1/2">
           <CardHeader>
             <CardTitle>Wprowadzenie</CardTitle>
           </CardHeader>
@@ -179,7 +179,7 @@ export default function NewUserPage() {
         </Card>
       )}
       {step == 1 && (
-        <Card className="w-1/2 h-1/2">
+        <Card className="w-full h-fit md:h-1/2 md:w-1/2">
           <CardHeader>
             <CardTitle>Wprowadzenie</CardTitle>
           </CardHeader>
@@ -210,7 +210,11 @@ export default function NewUserPage() {
         />
       )}
       {step === 3 && (
-        <Card className="gradient-border-box w-1/2 h-1/2">
+        <Card
+          className={`gradient-border-box w-full h-fit md:h-1/2 md:w-1/2 bg-background py-4 ${
+            !surveyResponse && "backdrop-blur-[0px] h-1/2 !backdrop-filter-none"
+          }`}
+        >
           <div className={`gradient ${surveyResponse && "finish"}`}></div>
           <CardContent
             className={`flex flex-col justify-center items-center text-center gap-2 h-full ${

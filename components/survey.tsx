@@ -62,7 +62,7 @@ export default function AppSurvey({
   };
 
   return (
-    <Card className="w-1/2 h-1/2">
+    <Card className="w-full h-fit md:h-1/2 md:w-1/2">
       <CardHeader>
         <CardTitle>Pytanie {questionIndex + 1}</CardTitle>
       </CardHeader>
@@ -86,7 +86,7 @@ export default function AppSurvey({
               onChange={() => handleAnswerSelection(option)}
               checked={answers.some((ans) => ans.option.id == option.id)}
             />
-            <div className="border border-input peer-checked:bg-green-500 w-full p-2 transition duration-300 rounded-md cursor-pointer">
+            <div className="border border-input peer-checked:bg-chart-1 w-full p-2 transition duration-300 rounded-md cursor-pointer">
               {option.option}
             </div>
           </label>

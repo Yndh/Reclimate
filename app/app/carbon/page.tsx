@@ -238,9 +238,11 @@ export default function CarbonPage() {
                       router.push("/calculate");
                     }}
                   >
-                    <span className="flex items-center gap-2 w-full h-full bg-background rounded-md px-3 py-2">
-                      Oblicz
-                      <SparklesIcon />
+                    <span className="w-full h-full bg-bgStart rounded-md">
+                      <span className="flex items-center gap-2 w-full h-full bg-card backdrop-blur-[8px] text-foreground hover:text-white rounded-md px-3 py-2">
+                        Oblicz
+                        <SparklesIcon />
+                      </span>
                     </span>
                   </Button>
                 )

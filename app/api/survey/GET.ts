@@ -65,10 +65,11 @@ export async function mGET(req: NextApiRequest, res: NextApiResponse) {
       }
     }
 
-    const questions: Question[] = getQuestions(10);
-
+    let questions: Question[];
     let newSurvey;
     if (!survey || (survey.carbonFootprint ?? 0) > 0) {
+      questions = getQuestions(10);
+
       newSurvey = await prisma.survey.create({
         data: {
           responses: {
@@ -95,21 +96,32 @@ export async function mGET(req: NextApiRequest, res: NextApiResponse) {
       });
     } else {
       newSurvey = survey;
+      questions = newSurvey.responses.map((response) => {
+        const options: Option[] = response.answers.map((answer) => ({
+          id: answer.id,
+          option: answer.answer,
+        }));
+
+        return {
+          id: response.id,
+          question: response.question,
+          options: options,
+        };
+      });
     }
 
-    questions.map((q) => {
+    questions.forEach((q) => {
       const questionResponse = newSurvey.responses.find(
         (res) => res.question === q.question
       );
       q.id = questionResponse?.id;
 
       if (questionResponse) {
-        q.options.map((option) => {
+        q.options.forEach((option) => {
           const answer = questionResponse.answers.find(
             (ans) => ans.answer === option.option
           );
           option.id = answer?.id;
-          answer;
         });
       }
     });

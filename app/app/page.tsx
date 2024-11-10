@@ -102,8 +102,6 @@ export default function AppPage() {
 
       if (timeLeft <= 0) {
         router.refresh();
-      } else if (completeTimeLeft <= 0) {
-        setCompleteLeftRefresh(null);
       } else {
         let days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
         let hours = Math.floor((timeLeft / (1000 * 60 * 60)) % 24);
@@ -117,6 +115,11 @@ export default function AppPage() {
             .toString()
             .padStart(2, "0")}`
         );
+
+        if (completeTimeLeft <= 0) {
+          setCompleteLeftRefresh(null);
+          return;
+        }
 
         days = Math.floor(completeTimeLeft / (1000 * 60 * 60 * 24));
         hours = Math.floor((completeTimeLeft / (1000 * 60 * 60)) % 24);

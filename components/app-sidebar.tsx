@@ -32,7 +32,7 @@ import {
   ChevronsUpDown,
 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
+import { redirect, usePathname } from "next/navigation";
 import Image from "next/image";
 import { Avatar } from "./ui/avatar";
 import { AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
@@ -73,6 +73,9 @@ export function AppSidebar() {
       redirect("/signIn");
     },
   });
+  const pathname = usePathname();
+
+  console.log(pathname);
 
   return (
     <Sidebar collapsible="icon">
@@ -92,7 +95,10 @@ export function AppSidebar() {
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={item.url === pathname.trim()}
+                  >
                     <a href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
