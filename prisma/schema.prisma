@@ -68,6 +68,7 @@ model Survey {
   userId          String
   user            User       @relation(name: "UserSurveys", fields: [userId], references: [id])
   responses       Response[]
+  tips            Tip[]
   carbonFootprint Float?
 
   createdAt DateTime @default(now())
@@ -94,6 +95,16 @@ model Answer {
 
   selectedInId String?   @unique
   selectedIn   Response? @relation("SelectedAnswer", fields: [selectedInId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Tip {
+  id          String @id @default(cuid())
+  surveyId    String
+  survey      Survey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  description String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

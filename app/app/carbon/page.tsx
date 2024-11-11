@@ -21,6 +21,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Survey, User } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CalculateTimer } from "@/components/calculateTimer";
 
 const chartConfig = {
   footprint: {
@@ -37,8 +38,7 @@ interface ChartData {
 export default function CarbonPage() {
   const router = useRouter();
 
-  const [refreshTime, setRefreshTime] = useState<string | null>(null);
-  const [remainingTime, setRemainingTime] = useState<string | null>(null);
+  const [refreshTime, setRefreshTime] = useState<Date | null>(null);
   const [cooldownLoading, setCooldownLoading] = useState(true);
   const [userData, setUserData] = useState<User>();
   const [chartData, setChartData] = useState<ChartData[]>([]);
@@ -82,11 +82,10 @@ export default function CarbonPage() {
           .then((data) => {
             setCooldownLoading(false);
             if (data.refreshTime) {
-              setRefreshTime(data.refreshTime);
+              setRefreshTime(new Date(data.refreshTime));
             }
             if (data.available) {
               setRefreshTime(null);
-              setRemainingTime(null);
             }
           });
       } catch (err) {
@@ -97,41 +96,6 @@ export default function CarbonPage() {
     fetchCooldown();
   }, []);
 
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-
-    if (refreshTime) {
-      const targetTime = new Date(refreshTime);
-
-      const updateCountdown = () => {
-        const now = new Date();
-        const timeLeft = targetTime.getTime() - now.getTime();
-
-        if (timeLeft <= 0) {
-          clearInterval(interval);
-          setRefreshTime(null);
-          setRemainingTime(null);
-        } else {
-          const hours = Math.floor(timeLeft / (1000 * 60 * 60));
-          const minutes = Math.floor(
-            (timeLeft % (1000 * 60 * 60)) / (1000 * 60)
-          );
-          const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-
-          setRemainingTime(
-            `${hours.toString().padStart(2, "0")}:${minutes
-              .toString()
-              .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
-          );
-        }
-      };
-
-      updateCountdown();
-      interval = setInterval(updateCountdown, 1000);
-    }
-
-    return () => clearInterval(interval);
-  }, [refreshTime]);
   const getDates = (): [Date, Date] => {
     const lowestDate = chartData.reduce(
       (min, item) => (item.date < min ? item.date : min),
@@ -226,26 +190,7 @@ export default function CarbonPage() {
             </CardHeader>
             <CardContent>
               {!cooldownLoading ? (
-                remainingTime ? (
-                  <Button variant={"outline"} disabled={true}>
-                    {remainingTime}
-                  </Button>
-                ) : (
-                  <Button
-                    className="hover-gradient-border p-0"
-                    variant={"outline"}
-                    onClick={() => {
-                      router.push("/calculate");
-                    }}
-                  >
-                    <span className="w-full h-full bg-bgStart rounded-md">
-                      <span className="flex items-center gap-2 w-full h-full bg-card backdrop-blur-[8px] text-foreground hover:text-white rounded-md px-3 py-2">
-                        Oblicz
-                        <SparklesIcon />
-                      </span>
-                    </span>
-                  </Button>
-                )
+                <CalculateTimer targetDate={refreshTime ?? new Date()} />
               ) : (
                 <Skeleton className="w-[80px] h-[35px]" />
               )}

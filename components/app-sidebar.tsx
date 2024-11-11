@@ -30,6 +30,7 @@ import {
   Crown,
   AlarmSmoke,
   ChevronsUpDown,
+  CalendarClock,
 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import { redirect, usePathname } from "next/navigation";
@@ -47,22 +48,38 @@ import {
 } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
+import logo from "@/app/logo.svg";
 
-const items = [
+const navItems = [
   {
-    title: "Dashboard",
-    url: "/app",
-    icon: HomeIcon,
+    label: "Aplikacja",
+    items: [
+      {
+        title: "Dashboard",
+        url: "/app",
+        icon: HomeIcon,
+      },
+      {
+        title: "Ślad węglowy",
+        url: "/app/carbon",
+        icon: AlarmSmoke,
+      },
+    ],
   },
   {
-    title: "Ślad węglowy",
-    url: "/app/carbon",
-    icon: AlarmSmoke,
-  },
-  {
-    title: "Ranking",
-    url: "/app/ranking",
-    icon: Crown,
+    label: "Społeczność",
+    items: [
+      {
+        title: "Wyzwania",
+        url: "/app/challenges",
+        icon: CalendarClock,
+      },
+      {
+        title: "Ranking",
+        url: "/app/ranking",
+        icon: Crown,
+      },
+    ],
   },
 ];
 
@@ -75,40 +92,47 @@ export function AppSidebar() {
   });
   const pathname = usePathname();
 
-  console.log(pathname);
-
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton>
-              <span>Hakhiros 2</span>
+            <SidebarMenuButton className="h-fit">
+              <Image
+                src={logo}
+                alt="logo"
+                width={40}
+                height={40}
+                className="border-[1px] rounded-md border-border aspect-square"
+              />
+              <span className="text-xl font-bold">Reclimate</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>App</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={item.url === pathname.trim()}
-                  >
-                    <a href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {navItems.map((item, index) => (
+          <SidebarGroup key={`item${index}`}>
+            <SidebarGroupLabel>{item.label}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {item.items.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={item.url === pathname.trim()}
+                    >
+                      <a href={item.url}>
+                        <item.icon size={16} />
+                        <span>{item.title}</span>
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
       <SidebarFooter className="my-2">
         <SidebarMenu>

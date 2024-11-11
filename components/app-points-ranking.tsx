@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { CaretSortIcon } from "@radix-ui/react-icons";
+import { CalendarIcon, CaretSortIcon } from "@radix-ui/react-icons";
 import {
   ColumnDef,
   SortingState,
@@ -22,9 +22,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { HoverCard, HoverCardContent } from "./ui/hover-card";
+import { HoverCardTrigger } from "@radix-ui/react-hover-card";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Separator } from "./ui/separator";
 
 export interface Leaderboard {
   name: string;
+  image: string;
+  createdAt: Date;
   points: number;
 }
 
@@ -144,9 +150,66 @@ export const columns: ColumnDef<Leaderboard>[] = [
   {
     accessorKey: "name",
     header: "Nazwa użytkownika",
-    cell: ({ row }) => (
-      <div className="font-medium">{row.getValue("name")}</div>
-    ),
+    cell: ({ row }) => {
+      const name = row.getValue("name") as string;
+      const image = row.original.image;
+      const joined = row.original.createdAt;
+      const rank = row.index + 1;
+      const points = row.original.points;
+
+      const date = new Date(joined);
+      const formatedDate = date.toLocaleDateString("pl-PL", {
+        year: "numeric",
+        month: "long",
+      });
+      const joinedDate =
+        formatedDate.charAt(0).toUpperCase() + formatedDate.slice(1);
+
+      return (
+        <div className="font-medium">
+          <HoverCard>
+            <HoverCardTrigger asChild className="hover:underline">
+              <span>{name}</span>
+            </HoverCardTrigger>
+            <HoverCardContent className="w-80">
+              <div className="flex justify-between space-x-4">
+                <Avatar>
+                  <AvatarImage src={image} />
+                  <AvatarFallback>pfp</AvatarFallback>
+                </Avatar>
+                <div className="space-y-4 w-full">
+                  <div>
+                    <h4 className="text-sm font-semibold">@{name}</h4>
+                    <div className="flex items-center pt-2">
+                      <CalendarIcon className="mr-2 h-4 w-4 opacity-70" />{" "}
+                      <span className="text-xs text-muted-foreground">
+                        Dołączono {joinedDate}
+                      </span>
+                    </div>
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between items-center w-full text-lg">
+                    <div className="flex flex-col w-full text-center">
+                      <span>#{rank}</span>
+                      <span className="text-sm text-muted-foreground">
+                        Miejsce
+                      </span>
+                    </div>
+                    <Separator orientation="vertical" className="h-[35px]" />
+                    <div className="flex flex-col w-full text-center">
+                      <span>{points}</span>
+                      <span className="text-xs text-muted-foreground">
+                        Punktów
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </HoverCardContent>
+          </HoverCard>
+        </div>
+      );
+    },
   },
   {
     accessorKey: "points",

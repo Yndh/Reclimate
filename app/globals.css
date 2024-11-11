@@ -14,13 +14,13 @@ body {
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --bg-start: rgba(94, 185, 150, .3);
-    --bg-end: #e6f0ee;
+    --background: 170 46% 90%;
+    --bg-start: rgba(105, 180, 160, .3);
+    --bg-end: 168, 25%, 92%;
     --foreground: 0 0% 3.9%;
-    --card: 168 25% 92% .4;
+    --card: 168, 25%, 92%, .2;
     --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
+    --popover: 170 46% 95%;
     --popover-foreground: 0 0% 3.9%;
     --primary: 0 0% 9%;
     --primary-foreground: 0 0% 98%;
@@ -28,20 +28,20 @@ body {
     --secondary-foreground: 0 0% 9%;
     --muted: 0 0% 96.1%;
     --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
+    --accent: 164, 33%, 56%, 0.1;
     --accent-foreground: 0 0% 9%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
+    --border: 0 0% 85%;
     --input: 0 0% 89.8%;
     --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
+    --chart-1: 164 33% 56%;
+    --chart-2: 0 38% 78%;
+    --chart-3: 240 30% 78%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
-    --sidebar-background: 0 0% 98%;
+    --sidebar-background: 0, 0%, 98%, 0.1;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
     --sidebar-primary-foreground: 0 0% 98%;
@@ -54,7 +54,7 @@ body {
   .dark {
     --background: 170 46% 5%;
     --bg-start: rgb(4, 70, 50, 0.3);
-    --bg-end: #071311;
+    --bg-end: 170 46% 5%;
     --foreground: 0 0% 98%;
     --card: 170 46% 5% .4;
     --card-foreground: 0 0% 98%;

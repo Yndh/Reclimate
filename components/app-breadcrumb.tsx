@@ -36,7 +36,7 @@ export const AppBreadcrumb = () => {
 
             return (
               <>
-                <BreadcrumbItem key={segment}>
+                <BreadcrumbItem key={`${segment}${index}`}>
                   {index === segments.length - 1 ? (
                     <span>{capitalize(segment)}</span>
                   ) : (
@@ -45,7 +45,9 @@ export const AppBreadcrumb = () => {
                     </BreadcrumbLink>
                   )}
                 </BreadcrumbItem>
-                {index < segments.length - 1 && <BreadcrumbSeparator />}
+                {index < segments.length - 1 && (
+                  <BreadcrumbSeparator key={`sep${index}`} />
+                )}
               </>
             );
           })

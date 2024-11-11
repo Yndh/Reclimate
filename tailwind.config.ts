@@ -10,9 +10,9 @@ const config: Config = {
   theme: {
     backgroundImage: {
       "gradient-bg":
-        "linear-gradient(45deg, var(--bg-start) 0%, var(--bg-end) 55%)",
+        "linear-gradient(45deg, var(--bg-start) 0%, hsl(var(--bg-end)) 55%)",
       "gradient-accent":
-        "linear-gradient(90deg, rgba(4,70,50,.7) 0%, rgba(4,70,50,0.3) 30%)",
+        "linear-gradient(90deg, var(--bg-start) 0%, hsl(var(--bg-end)) 100%)",
     },
     extend: {
       colors: {

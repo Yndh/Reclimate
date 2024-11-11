@@ -35,7 +35,7 @@ export default function RootLayout({
         <AppBlob side="right" x={10} y={10} bottom />
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >

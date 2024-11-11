@@ -141,6 +141,11 @@ export async function mPOST(req: Request, res: ResponseInterface) {
             },
           })),
         },
+        tips: {
+          create: tips.map((tip) => ({
+            description: tip,
+          })),
+        },
       },
       include: {
         responses: {
@@ -148,6 +153,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
             answer: true,
           },
         },
+        tips: true,
       },
     });
 

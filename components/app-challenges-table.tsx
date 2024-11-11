@@ -29,84 +29,121 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Survey } from "@/lib/types";
+import { Challenge, Survey } from "@/lib/types";
+import { CheckCircle2, CircleX } from "lucide-react";
 
-export type SurveyData = {
+export type ChallengeData = {
   id: string;
-  createdAt: Date;
-  questions: number;
-  carbonFootprint: number;
+  startDate: Date;
+  endDate: Date;
+  title: string;
+  points: number;
+  isCompleted: boolean;
 };
 
 const names = {
   id: "Id",
-  createdAt: "Data ankiety",
-  questions: "Pytania",
-  carbonFootprint: "Ślad węglowy",
+  title: "Tytuł",
+  points: "Punkty",
+  isCompleted: "Ukończone",
 };
 
-export const columns: ColumnDef<SurveyData>[] = [
+export const columns: ColumnDef<ChallengeData>[] = [
   {
     accessorKey: "id",
     header: "Id",
     cell: ({ row }) => <div className="capitalize">{row.getValue("id")}</div>,
   },
   {
-    accessorKey: "createdAt",
+    accessorKey: "durationDate",
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Data ankiety
+        Czas trwania
         <CaretSortIcon className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => (
-      <div className="lowercase">
-        {new Intl.DateTimeFormat("pl-PL", {
-          year: "numeric",
-          month: "2-digit",
+    cell: ({ row }) => {
+      const startDate = new Date(row.original.startDate);
+      const endDate = new Date(row.original.endDate);
+
+      const formatDate = (date: Date) => {
+        const formattedDate = date.toLocaleDateString("pl-PL", {
           day: "2-digit",
-        }).format(new Date(row.getValue("createdAt")))}
-      </div>
+          month: "long",
+          year: "numeric",
+        });
+
+        const [day, month, year] = formattedDate.split(" ");
+        const capitalizedMonth =
+          month.charAt(0).toLocaleUpperCase() + month.slice(1);
+
+        return { day, month: capitalizedMonth, year };
+      };
+
+      const start = formatDate(startDate);
+      const end = formatDate(endDate);
+
+      const isSameMonthAndYear =
+        start.month === end.month && start.year === end.year;
+
+      return (
+        <div className="lowercase">
+          {isSameMonthAndYear
+            ? `${start.day} - ${end.day} ${start.month} ${start.year}`
+            : `${start.day} ${start.month} ${start.year} - ${end.day} ${end.month} ${end.year}`}
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "title",
+    header: () => <div className="text-right">Tytuł</div>,
+    cell: ({ row }) => (
+      <div className="text-right font-medium">{row.getValue("title")}</div>
     ),
   },
   {
-    accessorKey: "questions",
-    header: () => <div className="text-right">Pytania</div>,
+    accessorKey: "points",
+    header: () => <div className="text-right">Ilość punktów</div>,
     cell: ({ row }) => (
-      <div className="text-right font-medium">{row.getValue("questions")}</div>
+      <div className="text-right font-medium">{row.getValue("points")}</div>
     ),
   },
   {
-    accessorKey: "carbonFootprint",
-    header: () => <div className="text-right">Ślad węglowy</div>,
+    accessorKey: "isCompleted",
+    header: () => <div className="text-right">Ukończone</div>,
     cell: ({ row }) => (
-      <div className="text-right font-medium">
-        {row.getValue("carbonFootprint")
-          ? `${row.getValue("carbonFootprint")}t CO₂`
-          : "N/A"}
+      <div className="flex justify-center font-medium">
+        {row.getValue("isCompleted") ? (
+          <CheckCircle2 className="text-green-700" />
+        ) : (
+          <CircleX className="text-red-700" />
+        )}
       </div>
     ),
   },
 ];
 
 interface SurveyTableProps {
-  surveys: Survey[];
+  challenges: Challenge[];
 }
 
-export function AppTable({ surveys }: SurveyTableProps) {
+export function AppChallengesTable({ challenges }: SurveyTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
 
-  const data: SurveyData[] = surveys.map((survey) => ({
-    id: survey.id,
-    createdAt: survey.createdAt,
-    questions: survey.responses.length ?? 0,
-    carbonFootprint: survey.carbonFootprint ?? 0,
+  const data: ChallengeData[] = challenges.map((challenge) => ({
+    id: challenge.id,
+    startDate: challenge.startDate,
+    endDate: challenge.endDate,
+    title: challenge.title,
+    points: challenge.points,
+    isCompleted: challenge.isCompleted,
   }));
 
   const table = useReactTable({

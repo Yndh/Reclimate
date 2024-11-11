@@ -8,10 +8,10 @@ export default async function RankingPage() {
   }
 
   const data = await res.json();
+  console.log(data);
+
   const { users }: { users: Leaderboard[] } = data;
   users.sort((a, b) => b.points - a.points);
-
-  console.log(data);
 
   return (
     <div className="w-full h-full p-8">

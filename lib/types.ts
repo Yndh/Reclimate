@@ -17,6 +17,7 @@ export interface Survey {
   userId: string;
   user: User;
   responses: Response[];
+  tips: Tip[];
   carbonFootprint?: number;
 
   createdAt: Date;
@@ -42,6 +43,16 @@ export interface Answer {
   answer: string;
   selectedInId: string;
   selectedIn: Response;
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Tip {
+  id: string;
+  surveyId: string;
+  survey: Survey;
+  description: string;
 
   createdAt: Date;
   updatedAt: Date;

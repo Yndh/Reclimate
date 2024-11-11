@@ -77,13 +77,8 @@ export async function mGET(req: NextApiRequest, res: NextApiResponse) {
         },
         include: {
           challenges: {
-            where: {
-              startDate: {
-                gte: start,
-              },
-              endDate: {
-                lte: end,
-              },
+            orderBy: {
+              endDate: "desc",
             },
           },
           surveys: {
@@ -107,6 +102,26 @@ export async function mGET(req: NextApiRequest, res: NextApiResponse) {
         }
       );
     }
+
+    user = await prisma.user.findFirst({
+      where: { id: session.user.id },
+      include: {
+        challenges: {
+          orderBy: {
+            endDate: "desc",
+          },
+        },
+        surveys: {
+          where: {
+            carbonFootprint: { not: null },
+          },
+          include: {
+            responses: true,
+            tips: true,
+          },
+        },
+      },
+    });
 
     return new NextResponse(
       JSON.stringify({

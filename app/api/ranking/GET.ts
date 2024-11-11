@@ -11,7 +11,10 @@ export async function mGET(req: NextApiRequest, res: NextApiResponse) {
       select: {
         name: true,
         points: true,
+        image: true,
+        createdAt: true,
       },
+      take: 50,
     });
 
     return new NextResponse(

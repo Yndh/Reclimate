@@ -26,6 +26,16 @@ import { Challenge, Survey, User } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
 import { Check, CheckCircle2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { CompleteTimer } from "@/components/completeTimer";
+import { Timer } from "@/components/timer";
 
 const chartConfig = {
   footprint: {
@@ -46,10 +56,7 @@ export default function AppPage() {
   });
   const [userData, setUserData] = useState<User>();
   const [chartData, setChartData] = useState<ChartData[]>([]);
-  const [challengesRefresh, setChallengesRefresh] = useState("");
-  const [completeLeftRefresh, setCompleteLeftRefresh] = useState<string | null>(
-    null
-  );
+  const [completeDate, setCompleteDate] = useState<Date>();
   const router = useRouter();
 
   useEffect(() => {
@@ -74,6 +81,11 @@ export default function AppPage() {
                   footprint: survey.carbonFootprint || 0,
                 }));
               setChartData(footprintData);
+
+              const target = new Date(data.user.challenges[0].endDate);
+              setCompleteDate(
+                new Date(target.getTime() - 1 * 24 * 60 * 60 * 1000)
+              );
             }
           });
       } catch (err) {
@@ -83,64 +95,6 @@ export default function AppPage() {
 
     fetchUser();
   }, []);
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (!userData) {
-      return;
-    }
-
-    const target = new Date(userData?.challenges[0].endDate);
-
-    const updateCountdown = () => {
-      const now = new Date();
-
-      const timeLeft = target.getTime() - now.getTime();
-
-      const completeDate = new Date(target.getTime() - 1 * 24 * 60 * 60 * 1000);
-      const completeTimeLeft = completeDate.getTime() - now.getTime();
-
-      if (timeLeft <= 0) {
-        router.refresh();
-      } else {
-        let days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-        let hours = Math.floor((timeLeft / (1000 * 60 * 60)) % 24);
-        let minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-        let seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-
-        setChallengesRefresh(
-          `${days.toString().padStart(2, "0")}:${hours
-            .toString()
-            .padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds
-            .toString()
-            .padStart(2, "0")}`
-        );
-
-        if (completeTimeLeft <= 0) {
-          setCompleteLeftRefresh(null);
-          return;
-        }
-
-        days = Math.floor(completeTimeLeft / (1000 * 60 * 60 * 24));
-        hours = Math.floor((completeTimeLeft / (1000 * 60 * 60)) % 24);
-        minutes = Math.floor(
-          (completeTimeLeft % (1000 * 60 * 60)) / (1000 * 60)
-        );
-        seconds = Math.floor((completeTimeLeft % (1000 * 60)) / 1000);
-
-        setCompleteLeftRefresh(
-          `${days.toString().padStart(2, "0")}:${hours
-            .toString()
-            .padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds
-            .toString()
-            .padStart(2, "0")}`
-        );
-      }
-    };
-
-    updateCountdown();
-    interval = setInterval(updateCountdown, 1000);
-  }, [userData]);
 
   const updateChallenge = async (id: string) => {
     try {
@@ -195,6 +149,21 @@ export default function AppPage() {
     return `${day} ${month}`;
   };
 
+  const getWeekStartAndEnd = (): { start: Date; end: Date } => {
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+
+    const start = new Date(now);
+    start.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    end.setHours(23, 59, 59, 999);
+
+    return { start, end };
+  };
+
   const [lowestDate, highestDate] = getDates();
   const formattedLowestDate = formatDate(lowestDate);
   const formattedHighestDate = formatDate(highestDate);
@@ -242,7 +211,29 @@ export default function AppPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">test</p>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant={"outline"}>Pokaż porady</Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Porady</DialogTitle>
+                    <DialogDescription>
+                      Porady do obnizenia śladu węglowego na podstawie twojej
+                      ostatniej ankiety
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="w-full box-border">
+                    <ol className="list-decimal w-full pl-4 space-y-2">
+                      {userData?.surveys[userData?.surveys.length - 1].tips.map(
+                        (tip) => (
+                          <li className="text-sm">{tip.description}</li>
+                        )
+                      )}
+                    </ol>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </CardContent>
           </Card>
         </div>
@@ -312,9 +303,12 @@ export default function AppPage() {
                 <CardDescription>Twoje zadania na ten tydzień</CardDescription>
               </div>
 
-              {challengesRefresh ? (
+              {!userData?.challenges ? (
                 <span className="text-sm text-muted-foreground">
-                  {challengesRefresh}
+                  {(() => {
+                    const { end } = getWeekStartAndEnd();
+                    return <Timer targetDate={end} />;
+                  })()}
                 </span>
               ) : (
                 <Skeleton className="h-[14px] w-[30px]" />
@@ -327,7 +321,7 @@ export default function AppPage() {
                     <PopoverTrigger asChild>
                       <Button variant="ghost" className="h-fit mb-4">
                         <div className="flex align-top justify-start gap-4 h-fit w-full m-0">
-                          <p className="text-sm text-white font-bold bg-green-600 rounded-full aspect-square w-12 h-12 flex items-center justify-center">
+                          <p className="text-sm text-white font-bold bg-green-700 rounded-full aspect-square w-12 h-12 flex items-center justify-center">
                             {challenge.isCompleted ? (
                               <Check />
                             ) : (
@@ -347,7 +341,14 @@ export default function AppPage() {
                                 challenge.isCompleted && "line-through"
                               }`}
                             >
-                              {challenge.description}
+                              {challenge.description.length > 150
+                                ? challenge.description.slice(
+                                    0,
+                                    challenge.description
+                                      .slice(0, 150)
+                                      .lastIndexOf(" ")
+                                  ) + "..."
+                                : challenge.description}
                             </p>
                           </div>
                         </div>
@@ -368,14 +369,12 @@ export default function AppPage() {
                             <Button variant={"outline"}>
                               <CheckCircle2 /> Ukończone
                             </Button>
-                          ) : completeLeftRefresh ? (
-                            <Button disabled>{completeLeftRefresh}</Button>
                           ) : (
-                            <Button
-                              onClick={() => updateChallenge(challenge.id)}
-                            >
-                              Oznacz jako ukończone
-                            </Button>
+                            <CompleteTimer
+                              targetDate={completeDate ?? new Date()}
+                              id={challenge.id}
+                              onClick={updateChallenge}
+                            />
                           )}
                         </div>
                       </div>
