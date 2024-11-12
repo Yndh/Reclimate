@@ -1,4 +1,4 @@
-import OpenAI from "openai";
+import { OpenAi } from "./openai";
 
 interface SurveyAnswers {
   question: string;
@@ -13,12 +13,8 @@ interface FootprintResponse {
 export const calculateFootprint = async (
   answers: SurveyAnswers[]
 ): Promise<FootprintResponse> => {
-  const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
-
   try {
-    const response = await openai.chat.completions.create({
+    const response = await OpenAi.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {

@@ -228,10 +228,14 @@ export default function CarbonPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="text-2xl font-bold">
-              {(() => {
-                const { end } = getWeekStartAndEnd();
-                return <Timer targetDate={end} />;
-              })()}
+              {userData?.challenges != null ? (
+                (() => {
+                  const { end } = getWeekStartAndEnd();
+                  return <Timer targetDate={end} />;
+                })()
+              ) : (
+                <Skeleton className="w-[80px] h-[30px]" />
+              )}
             </CardContent>
           </Card>
         </div>

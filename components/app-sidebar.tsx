@@ -49,6 +49,8 @@ import {
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import logo from "@/app/logo.svg";
+import logoLight from "@/app/logo-light.svg";
+import { useTheme } from "next-themes";
 
 const navItems = [
   {
@@ -91,6 +93,8 @@ export function AppSidebar() {
     },
   });
   const pathname = usePathname();
+  const { theme } = useTheme();
+  console.log(theme);
 
   return (
     <Sidebar collapsible="icon">
@@ -99,7 +103,7 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton className="h-fit">
               <Image
-                src={logo}
+                src={theme == "dark" ? logo : logoLight}
                 alt="logo"
                 width={40}
                 height={40}

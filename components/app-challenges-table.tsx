@@ -29,7 +29,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Challenge, Survey } from "@/lib/types";
+import { Challenge } from "@/lib/types";
 import { CheckCircle2, CircleX } from "lucide-react";
 
 export type ChallengeData = {
@@ -75,17 +75,14 @@ export const columns: ColumnDef<ChallengeData>[] = [
           month: "long",
           year: "numeric",
         });
-
         const [day, month, year] = formattedDate.split(" ");
         const capitalizedMonth =
           month.charAt(0).toLocaleUpperCase() + month.slice(1);
-
         return { day, month: capitalizedMonth, year };
       };
 
       const start = formatDate(startDate);
       const end = formatDate(endDate);
-
       const isSameMonthAndYear =
         start.month === end.month && start.year === end.year;
 
@@ -137,31 +134,39 @@ export function AppChallengesTable({ challenges }: SurveyTableProps) {
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
 
-  const data: ChallengeData[] = challenges.map((challenge) => ({
-    id: challenge.id,
-    startDate: challenge.startDate,
-    endDate: challenge.endDate,
-    title: challenge.title,
-    points: challenge.points,
-    isCompleted: challenge.isCompleted,
-  }));
+  const data = React.useMemo(() => {
+    return challenges.map((challenge) => ({
+      id: challenge.id,
+      startDate: challenge.startDate,
+      endDate: challenge.endDate,
+      title: challenge.title,
+      points: challenge.points,
+      isCompleted: challenge.isCompleted,
+    }));
+  }, [challenges]);
 
   const table = useReactTable({
     data,
     columns,
-    onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
+    onSortingChange: React.useCallback(setSorting, []),
+    getCoreRowModel: React.useMemo(() => getCoreRowModel(), []),
+    getPaginationRowModel: React.useMemo(() => getPaginationRowModel(), []),
+    getSortedRowModel: React.useMemo(() => getSortedRowModel(), []),
+    getFilteredRowModel: React.useMemo(() => getFilteredRowModel(), []),
+    onColumnVisibilityChange: React.useCallback(setColumnVisibility, []),
+    onRowSelectionChange: React.useCallback(setRowSelection, []),
     state: {
       sorting,
       columnVisibility,
       rowSelection,
     },
   });
+
+  const handlePreviousPage = React.useCallback(
+    () => table.previousPage(),
+    [table]
+  );
+  const handleNextPage = React.useCallback(() => table.nextPage(), [table]);
 
   return (
     <div className="w-full">
@@ -200,23 +205,21 @@ export function AppChallengesTable({ challenges }: SurveyTableProps) {
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  );
-                })}
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -254,7 +257,7 @@ export function AppChallengesTable({ challenges }: SurveyTableProps) {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.previousPage()}
+            onClick={handlePreviousPage}
             disabled={!table.getCanPreviousPage()}
           >
             Previous
@@ -262,7 +265,7 @@ export function AppChallengesTable({ challenges }: SurveyTableProps) {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.nextPage()}
+            onClick={handleNextPage}
             disabled={!table.getCanNextPage()}
           >
             Next

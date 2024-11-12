@@ -1,4 +1,4 @@
-import OpenAI from "openai";
+import { OpenAi } from "./openai";
 
 interface ChallengeAi {
   title: string;
@@ -7,12 +7,8 @@ interface ChallengeAi {
 }
 
 export const generateChallenges = async (): Promise<ChallengeAi[]> => {
-  const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
-
   try {
-    const response = await openai.chat.completions.create({
+    const response = await OpenAi.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {

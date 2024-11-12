@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { getQuestions } from "@/lib/getQuestions";
+import { getQuestions, SurveyAnswers } from "@/lib/getQuestions";
 import { prisma } from "@/lib/prisma";
 import { Survey } from "@/lib/types";
 import { error } from "console";
@@ -68,7 +68,53 @@ export async function mGET(req: NextApiRequest, res: NextApiResponse) {
     let questions: Question[];
     let newSurvey;
     if (!survey || (survey.carbonFootprint ?? 0) > 0) {
-      questions = getQuestions(10);
+      const lastSurvey = await prisma.survey.findFirst({
+        where: {
+          userId: session.user.id,
+          carbonFootprint: {
+            not: null,
+          },
+        },
+        include: {
+          responses: {
+            include: {
+              answer: true,
+            },
+          },
+        },
+        orderBy: {
+          updatedAt: "desc",
+        },
+      });
+
+      if (!lastSurvey) {
+        return new NextResponse(
+          JSON.stringify({
+            error: "You cant access this survey",
+          }),
+          {
+            status: 405,
+          }
+        );
+      }
+
+      const sur: SurveyAnswers[] = lastSurvey.responses.map((res) => ({
+        question: res.question as string,
+        selectedAnswer: res.answer?.answer as string,
+      }));
+
+      questions = await getQuestions(sur);
+
+      if (questions.length == 0) {
+        return new NextResponse(
+          JSON.stringify({
+            error: "Server error",
+          }),
+          {
+            status: 500,
+          }
+        );
+      }
 
       newSurvey = await prisma.survey.create({
         data: {

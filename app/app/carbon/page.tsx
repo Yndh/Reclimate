@@ -119,6 +119,8 @@ export default function CarbonPage() {
   const formattedLowestDate = formatDate(lowestDate);
   const formattedHighestDate = formatDate(highestDate);
 
+  console.log("init");
+
   return (
     <div className="w-full h-full p-8">
       <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-4 ">

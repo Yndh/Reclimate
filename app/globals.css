@@ -15,12 +15,12 @@ body {
 @layer base {
   :root {
     --background: 170 46% 90%;
-    --bg-start: rgba(105, 180, 160, .3);
+    --bg-start: #69b4a04d;
     --bg-end: 168, 25%, 92%;
     --foreground: 0 0% 3.9%;
     --card: 168, 25%, 92%, .2;
     --card-foreground: 0 0% 3.9%;
-    --popover: 170 46% 95%;
+    --popover: 170 46% 90%;
     --popover-foreground: 0 0% 3.9%;
     --primary: 0 0% 9%;
     --primary-foreground: 0 0% 98%;

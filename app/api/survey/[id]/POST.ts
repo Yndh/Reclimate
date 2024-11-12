@@ -119,11 +119,18 @@ export async function mPOST(req: Request, res: ResponseInterface) {
     });
 
     const response = await calculateFootprint(surveyAnswers);
-    // const response = {
-    //   footprint: 3.5,
-    //   tips: [],
-    // };
     const { footprint, tips } = response;
+
+    if (!footprint || tips.length == 0) {
+      return new NextResponse(
+        JSON.stringify({
+          error: "Server error",
+        }),
+        {
+          status: 500,
+        }
+      );
+    }
 
     const updatedSurvey = await prisma.survey.update({
       where: { id: surveyId },

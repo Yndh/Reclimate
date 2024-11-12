@@ -102,29 +102,37 @@ export function AppTable({ surveys }: SurveyTableProps) {
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
 
-  const data: SurveyData[] = surveys.map((survey) => ({
-    id: survey.id,
-    createdAt: survey.createdAt,
-    questions: survey.responses.length ?? 0,
-    carbonFootprint: survey.carbonFootprint ?? 0,
-  }));
+  const data = React.useMemo(() => {
+    return surveys.map((survey) => ({
+      id: survey.id,
+      createdAt: survey.createdAt,
+      questions: survey.responses.length ?? 0,
+      carbonFootprint: survey.carbonFootprint ?? 0,
+    }));
+  }, [surveys]);
 
   const table = useReactTable({
     data,
     columns,
-    onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
+    onSortingChange: React.useCallback(setSorting, []),
+    getCoreRowModel: React.useMemo(() => getCoreRowModel(), []),
+    getPaginationRowModel: React.useMemo(() => getPaginationRowModel(), []),
+    getSortedRowModel: React.useMemo(() => getSortedRowModel(), []),
+    getFilteredRowModel: React.useMemo(() => getFilteredRowModel(), []),
+    onColumnVisibilityChange: React.useCallback(setColumnVisibility, []),
+    onRowSelectionChange: React.useCallback(setRowSelection, []),
     state: {
       sorting,
       columnVisibility,
       rowSelection,
     },
   });
+
+  const handlePreviousPage = React.useCallback(
+    () => table.previousPage(),
+    [table]
+  );
+  const handleNextPage = React.useCallback(() => table.nextPage(), [table]);
 
   return (
     <div className="w-full">
@@ -163,23 +171,21 @@ export function AppTable({ surveys }: SurveyTableProps) {
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  );
-                })}
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -217,7 +223,7 @@ export function AppTable({ surveys }: SurveyTableProps) {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.previousPage()}
+            onClick={handlePreviousPage}
             disabled={!table.getCanPreviousPage()}
           >
             Previous
@@ -225,7 +231,7 @@ export function AppTable({ surveys }: SurveyTableProps) {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.nextPage()}
+            onClick={handleNextPage}
             disabled={!table.getCanNextPage()}
           >
             Next
