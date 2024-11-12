@@ -118,5 +118,11 @@ export async function mGET(req: NextApiRequest, res: NextApiResponse) {
     );
   } catch (err) {
     console.error(`Error getting user data: ${err}`);
+    return new NextResponse(
+      JSON.stringify({ error: `Failed to get user data` }),
+      {
+        status: 500,
+      }
+    );
   }
 }

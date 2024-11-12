@@ -122,7 +122,7 @@ export default function CarbonPage() {
   console.log("init");
 
   return (
-    <div className="w-full h-full p-8">
+    <div className="overflow-y-scroll md:overflow-y-hidden w-full h-full p-8">
       <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-4 ">
         <Card className="order-2 md:order-1 lg:col-span-2">
           <CardHeader>
@@ -215,7 +215,7 @@ export default function CarbonPage() {
           </Card>
         </div>
       </div>
-      <div className="h-[300px] md:h-[400px] lg:h-full overflow-y-auto">
+      <div className="h-full overflow-y-auto">
         <AppTable surveys={userData?.surveys ?? []} />
       </div>
     </div>

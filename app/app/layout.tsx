@@ -17,7 +17,7 @@ export default function Layout({
     <SessionProvider>
       <SidebarProvider>
         <AppSidebar />
-        <main className="w-full h-screen overflow-hidden">
+        <main className="w-full h-screen pb-5 box-border relative overflow-y-hidden">
           <div className="flex justify-between items-center p-2">
             <div className="flex items-center gap-2 relative">
               <SidebarTrigger />

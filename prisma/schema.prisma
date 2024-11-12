@@ -16,6 +16,7 @@ model User {
   accounts        Account[]
   sessions        Session[]
   surveys         Survey[]    @relation(name: "UserSurveys")
+  chats           Chat[]
   challenges      Challenge[]
   points          Int         @default(0)
   carbonFootprint Float?
@@ -123,4 +124,31 @@ model Challenge {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Chat {
+  id       String    @id @default(cuid())
+  userId   String
+  user     User      @relation(fields: [userId], references: [id])
+  messages Message[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Message {
+  id     String @id @default(cuid())
+  chatId String
+  chat   Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  text   String
+  tokens Int
+  sender Sender
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Sender {
+  USER
+  ASSISTANT
 }

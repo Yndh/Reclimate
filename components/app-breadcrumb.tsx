@@ -8,6 +8,7 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "./ui/breadcrumb";
+import React from "react";
 
 export const AppBreadcrumb = () => {
   const pathname = usePathname();
@@ -22,11 +23,11 @@ export const AppBreadcrumb = () => {
       <BreadcrumbList>
         {pathname === "/app" ? (
           <>
-            <BreadcrumbItem>
+            <BreadcrumbItem key={"app"}>
               <BreadcrumbLink href="/app">App</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
-            <BreadcrumbItem>
+            <BreadcrumbItem key={"dashboard"}>
               <BreadcrumbLink href="/app">Dashboard</BreadcrumbLink>
             </BreadcrumbItem>
           </>
@@ -35,8 +36,8 @@ export const AppBreadcrumb = () => {
             const href = `/app/${segments.slice(0, index + 1).join("/")}`;
 
             return (
-              <>
-                <BreadcrumbItem key={`${segment}${index}`}>
+              <React.Fragment key={`frag${index}`}>
+                <BreadcrumbItem>
                   {index === segments.length - 1 ? (
                     <span>{capitalize(segment)}</span>
                   ) : (
@@ -45,10 +46,8 @@ export const AppBreadcrumb = () => {
                     </BreadcrumbLink>
                   )}
                 </BreadcrumbItem>
-                {index < segments.length - 1 && (
-                  <BreadcrumbSeparator key={`sep${index}`} />
-                )}
-              </>
+                {index < segments.length - 1 && <BreadcrumbSeparator />}
+              </React.Fragment>
             );
           })
         )}

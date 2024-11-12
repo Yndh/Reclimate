@@ -5,6 +5,7 @@ export interface User {
   image?: string;
   surveys: Survey[];
   challenges: Challenge[];
+  chats: Chat[];
   points: number;
   carbonFootprint?: number;
 
@@ -71,4 +72,31 @@ export interface Challenge {
 
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface Chat {
+  id: string;
+  userId: string;
+  user: User;
+  messages: Message[];
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Message {
+  id: string;
+  chatId: string;
+  chat: Chat;
+  text: string;
+  tokens: number;
+  sender: Sender;
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export enum Sender {
+  USER = "USER",
+  ASSISTANT = "ASSISTANT",
 }
