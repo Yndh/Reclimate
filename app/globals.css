@@ -134,6 +134,21 @@ body {
   }
 }
 
+@keyframes gradient-loading {
+  0% {
+    left: -100%;
+    opacity: 0.4;
+  }
+  50% {
+    left: 100%;
+    opacity: 0.2;
+  }
+  100% {
+    left: -100%;
+    opacity: 0.4;
+  }
+}
+
 .hover-gradient-border {
   transition: border 0.3s ease;
 }
@@ -189,17 +204,31 @@ body {
   animation-delay: 0.3s;
 }
 
-@keyframes gradient-loading {
+.gradient-text {
+  position: relative;
+  background: linear-gradient(to right, #3b82f6, #9333ea, #ec4899);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  background-size: 200% 200%;
+  animation: fadeInGradient 1s ease-in-out forwards;
+  transition: 0.3s;
+}
+
+@keyframes fadeInGradient {
   0% {
-    left: -100%;
-    opacity: 0.4;
-  }
-  50% {
-    left: 100%;
-    opacity: 0.2;
+    color: transparent;
+    background: linear-gradient(to right, #3b82f6, #9333ea, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    opacity: 0;
+    filter: blur(2px);
   }
   100% {
-    left: -100%;
-    opacity: 0.4;
+    background: none;
+    -webkit-background-clip: initial;
+    -webkit-text-fill-color: initial;
+    color: var(--foreground);
+    opacity: 1;
   }
 }

@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { calculateFootprint } from "@/lib/calculateFootprint";
 import { prisma } from "@/lib/prisma";
 import { Sender } from "@/lib/types";
+import { error } from "console";
 import { NextApiResponse } from "next";
 import { NextResponse } from "next/server";
 
@@ -16,6 +17,8 @@ interface ResponseInterface<T = any> extends NextApiResponse<T> {
 interface SendMessageReqBody {
   message: string;
 }
+
+const TOKENS_LIMIT = (process.env.DAILY_TOKENS_LIMIT ?? 0) as number;
 
 export async function mPOST(req: Request, res: ResponseInterface) {
   const session = await auth();
@@ -51,6 +54,44 @@ export async function mPOST(req: Request, res: ResponseInterface) {
     });
   }
 
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
+  const endOfDay = new Date();
+  endOfDay.setHours(23, 59, 59, 999);
+
+  const messages = await prisma.message.findMany({
+    where: {
+      chat: {
+        userId: session.user.id,
+      },
+      updatedAt: {
+        gte: startOfDay,
+        lte: endOfDay,
+      },
+    },
+  });
+
+  const totalTokens = messages.reduce(
+    (sum, message) => (sum += message.tokens || 0),
+    0
+  );
+  console.log(`${session.user.id} used ${totalTokens} output tokens today`);
+  if (totalTokens > TOKENS_LIMIT) {
+    const nextDay = new Date();
+    nextDay.setDate(nextDay.getDate() + 1);
+    nextDay.setHours(0, 0, 0, 0);
+
+    return new NextResponse(
+      JSON.stringify({
+        error: "You must wait for the cooldown period to use assistant",
+        refreshTime: nextDay.toISOString(),
+      }),
+      {
+        status: 429,
+      }
+    );
+  }
+
   const body: SendMessageReqBody = await req.json();
   const { message } = body;
 
@@ -65,6 +106,8 @@ export async function mPOST(req: Request, res: ResponseInterface) {
 
   try {
     const { message: answer, output_tokens } = await answerQuestion(message);
+
+    console.log(answer);
 
     const newMessage = await prisma.message.create({
       data: {
@@ -81,7 +124,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
 
     const aiMessage = await prisma.message.create({
       data: {
-        text: answer,
+        text: answer.replace(/\n+/g, "\\n"),
         tokens: output_tokens,
         chat: {
           connect: {

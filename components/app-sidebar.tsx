@@ -137,7 +137,15 @@ export function AppSidebar() {
   });
   const pathname = usePathname();
   const router = useRouter();
-  const { resolvedTheme: theme } = useTheme();
+  const { resolvedTheme } = useTheme();
+  const [theme, setTheme] = useState("");
+
+  useEffect(() => {
+    if (resolvedTheme) {
+      setTheme(resolvedTheme);
+    }
+  }, [resolvedTheme]);
+
   const [navItems, setNavItems] = useState(initNavItems);
   const [isCreating, setIsCreating] = useState(false);
 
@@ -202,6 +210,7 @@ export function AppSidebar() {
 
           if (data.chat) {
             router.push(`app/assistant/${data.chat.id}`);
+            setIsCreating(false);
           }
         });
     } catch (err) {
@@ -217,8 +226,8 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton className="h-fit">
               <Image
-                src={theme === "dark" ? logo : logoLight}
-                alt="logo"
+                src={theme == "light" ? logoLight : logo}
+                alt={`logo`}
                 width={40}
                 height={40}
                 className="border-[1px] rounded-md border-border aspect-square"

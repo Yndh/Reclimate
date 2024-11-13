@@ -16,6 +16,28 @@ export async function mGET(req: NextApiRequest, res: NextApiResponse) {
   }
 
   try {
+    const emptyChats = await prisma.chat.findMany({
+      where: {
+        messages: {
+          none: {},
+        },
+      },
+    });
+
+    if (emptyChats) {
+      for (const chat of emptyChats) {
+        await prisma.chat.delete({
+          where: { id: chat.id },
+        });
+      }
+
+      console.log(`Deleted ${emptyChats.length} empty chats.`);
+    }
+  } catch (err) {
+    console.error(`Error cleaning up empty chats: ${err}`);
+  }
+
+  try {
     const chats = await prisma.chat.findMany({
       where: { userId: session.user.id },
     });

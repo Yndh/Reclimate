@@ -1,15 +1,10 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Send, SendHorizonal } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
-import { Chat, Message, Sender } from "@/lib/types";
-import assistant from "@/app/assistant.png";
+import { Chat, Sender } from "@/lib/types";
 import { useRouter } from "next/navigation";
+import { AppChat } from "@/components/app-chat";
 
 interface ChatPageInterface {
   params: { id: string };
@@ -20,6 +15,29 @@ interface MessageState {
   sender: Sender;
 }
 
+const questions: string[] = [
+  "Jak mogę zmniejszyć mój ślad węglowy na co dzień?",
+  "Jakie są najnowsze inicjatywy na rzecz ochrony klimatu?",
+  "Jakie skutki ma globalne ocieplenie dla mojego regionu?",
+  "Jakie rośliny najlepiej oczyszczają powietrze w domu?",
+  "Czy samochody elektryczne rzeczywiście są bardziej ekologiczne?",
+  "Jak działa recykling elektroniki i jak mogę w nim uczestniczyć?",
+  "Jakie kraje osiągają największe postępy w ograniczaniu emisji CO2?",
+  "Jakie są alternatywy dla plastiku jednorazowego użytku?",
+  "Jakie działania mogę podjąć, aby oszczędzać wodę w domu?",
+  "Co to jest bioróżnorodność i dlaczego jest ważna?",
+  "W jaki sposób rolnictwo wpływa na zmiany klimatyczne?",
+  "Jakie są najlepsze sposoby na ochronę pszczół i innych owadów zapylających?",
+  "Jakie organizacje mogę wspierać, aby przyczynić się do ochrony środowiska?",
+  "Jakie są najważniejsze zasady segregacji odpadów?",
+  "Jakie zmiany klimatyczne są prognozowane na nadchodzące lata?",
+  "Co oznacza neutralność klimatyczna i jak mogę ją wspierać?",
+  "Jakie są ekologiczne alternatywy dla produktów codziennego użytku?",
+  "Jak ograniczyć zużycie energii elektrycznej w moim domu?",
+  "Czym są gatunki inwazyjne i jak wpływają na środowisko?",
+  "Jakie są najbardziej zagrożone gatunki zwierząt i jak mogę im pomóc?",
+];
+
 export default function AsisstantChatPage({ params }: ChatPageInterface) {
   const { data: session } = useSession({
     required: true,
@@ -27,9 +45,7 @@ export default function AsisstantChatPage({ params }: ChatPageInterface) {
   });
   const router = useRouter();
   const [chat, setChat] = useState<MessageState[]>([]);
-  const [message, setMessage] = useState<string>("");
   const [isFetching, setIsFetching] = useState<boolean>(true);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const id = params.id;
 
   useEffect(() => {
@@ -38,7 +54,6 @@ export default function AsisstantChatPage({ params }: ChatPageInterface) {
         await fetch(`/api/chats/${id}`)
           .then((res) => res.json())
           .then((data) => {
-            console.log(data);
             if (data.error) {
               alert(data.error);
               router.replace("/app");
@@ -65,147 +80,15 @@ export default function AsisstantChatPage({ params }: ChatPageInterface) {
     fetchChat();
   }, []);
 
-  const sendMessage = async () => {
-    if (message.trim().length == 0) {
-      return;
-    }
-
-    if (message.trim().length > 400) {
-      return;
-    }
-
-    setMessage("");
-    setChat((prevMessages) => [
-      ...prevMessages,
-      {
-        text: message.trim(),
-        sender: Sender.USER,
-      },
-    ]);
-    setIsLoading(true);
-
-    try {
-      await fetch(`/api/chats/${id}`, {
-        method: "POST",
-        body: JSON.stringify({
-          message: message,
-        }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.error) {
-            alert(data.error);
-            return;
-          }
-
-          if (data.message) {
-            const resMessage: Message = data.message;
-            setChat((prevMessages) => [
-              ...prevMessages,
-              {
-                text: resMessage.text,
-                sender: resMessage.sender,
-              },
-            ]);
-            setIsLoading(false);
-          }
-        });
-    } catch (err) {
-      alert(err);
-    }
-  };
-
   return (
     <div className="flex flex-col items-center w-full h-full p-8 pb-12 gap-6 box-border">
-      <div className="w-full md:w-2/3 h-full flex flex-col gap-8 overflow-y-scroll">
-        {isFetching ? (
-          <>
-            <div className="flex items-start justify-start gap-4 w-full">
-              <Avatar>
-                <AvatarImage src={"" as string} />
-                <AvatarFallback>🤖</AvatarFallback>
-              </Avatar>
-              <div className="h-fit space-y-2 max-w-[200px] mt-1">
-                <Skeleton className="w-[200px] h-[14px]" />
-                <Skeleton className="w-[200px] h-[14px]" />
-                <Skeleton className="w-[100px] h-[14px]" />
-              </div>
-            </div>
-            <div className="flex items-start justify-end gap-4 w-full">
-              <div className="h-fit space-y-2 max-w-[200px] mt-1">
-                <Skeleton className="w-[200px] h-[14px] " />
-                <Skeleton className="w-[200px] h-[14px] " />
-                <Skeleton className="w-[100px] h-[14px] " />
-              </div>
-            </div>
-          </>
-        ) : (
-          <>
-            {chat.length > 0 ? (
-              chat.map((message, index) => (
-                <div
-                  className={`flex items-start justify-${
-                    message.sender == Sender.USER ? "end" : "start"
-                  } gap-4 w-full`}
-                  key={`message${index}`}
-                >
-                  {message.sender == Sender.ASSISTANT && (
-                    <span className="w-[40px] h-[40px] aspect-square rounded-full flex items-center justify-center bg-muted">
-                      🤖
-                    </span>
-                  )}
-                  <div
-                    className={`h-fit space-y-2 min-w-[100px] max-w-[400px] mt-1 rounded-md p-2 ${
-                      message.sender == Sender.USER &&
-                      "bg-popover border backdrop-blur-[8px] shadow"
-                    }`}
-                  >
-                    <p className="text-wrap">{message.text}</p>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center gap-2">
-                <h1 className="text-4xl font-bold">W czym mogę pomóc?</h1>
-                <p className="text-sm text-muted-foreground">
-                  Zadaj pytanie twojemu ekologicznemu asystentowi!
-                </p>
-              </div>
-            )}
-            {isLoading && (
-              <div className="flex items-start justify-start gap-4 w-full">
-                <Avatar>
-                  <AvatarImage src={"" as string} />
-                  <AvatarFallback>🤖</AvatarFallback>
-                </Avatar>
-                <div className="h-fit space-y-2 max-w-[200px] mt-1">
-                  <Skeleton className="w-[200px] h-[14px] gradient-animation" />
-                  <Skeleton className="w-[200px] h-[14px] gradient-animation" />
-                  <Skeleton className="w-[100px] h-[14px] gradient-animation" />
-                </div>
-              </div>
-            )}
-          </>
-        )}
-      </div>
-      <div className="w-full md:w-4/5 h-fit flex flex-row items-center mb-4 gap-2 relative">
-        <Input
-          value={message}
-          onChange={(e) => setMessage(e.target.value as string)}
-          className={`p-6 rounded-full pr-20 ${
-            message.trim().length > 400 && "border-red-700"
-          }`}
-          placeholder="Wpisz wiadomość..."
+      <div className="w-full md:w-2/3 h-full">
+        <AppChat
+          messages={chat}
+          id={id}
+          isFetching={isFetching}
+          setMessages={setChat}
         />
-        <span className="text-sm text-muted-foreground outline-none absolute right-20">
-          {message.trim().length}/400
-        </span>
-        <button
-          className="aspect-square rounded-full w-[50px] h-[50px] p-2 flex items-center justify-center hover:bg-accent duration-300"
-          onClick={sendMessage}
-        >
-          <SendHorizonal size={24} />
-        </button>
       </div>
     </div>
   );

@@ -1,13 +1,14 @@
 "use client";
 
-import React from "react";
+import React, { Dispatch } from "react";
 import { useEffect, useState } from "react";
 
 interface TimerProps {
   targetDate: Date;
+  setData?: Dispatch<React.SetStateAction<Date | null>>;
 }
 
-export const Timer = React.memo(({ targetDate }: TimerProps) => {
+export const Timer = React.memo(({ targetDate, setData }: TimerProps) => {
   const [timeLeft, setTimeLeft] = useState<string>("");
 
   useEffect(() => {
@@ -32,6 +33,10 @@ export const Timer = React.memo(({ targetDate }: TimerProps) => {
         );
       } else {
         setTimeLeft("00:00:00:00");
+        if (setData) {
+          setData(null);
+        }
+
         return;
       }
     };

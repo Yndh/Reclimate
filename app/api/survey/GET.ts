@@ -55,7 +55,8 @@ export async function mGET(req: NextApiRequest, res: NextApiResponse) {
       if (Date.now() < refreshTime.getTime()) {
         return new NextResponse(
           JSON.stringify({
-            error: "You need to wait to ",
+            error:
+              "You must wait for the cooldown period to complete before starting the next survey",
             refreshTime: refreshTime.toISOString,
           }),
           {

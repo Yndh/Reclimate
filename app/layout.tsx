@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AppBlob } from "@/components/app-blob";
+import { ChatPopup } from "@/components/app-chat-popup";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -35,6 +36,7 @@ export default function RootLayout({
         <AppBlob side="right" x={10} y={10} bottom />
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           {children}
+          <ChatPopup />
         </ThemeProvider>
       </body>
     </html>

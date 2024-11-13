@@ -71,7 +71,6 @@ export default function AppPage() {
             }
 
             if (data.user) {
-              console.log(data);
               setUserData(data.user);
 
               const footprintData = data.user.surveys
@@ -211,29 +210,35 @@ export default function AppPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant={"outline"}>Pokaż porady</Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Porady</DialogTitle>
-                    <DialogDescription>
-                      Porady do obnizenia śladu węglowego na podstawie twojej
-                      ostatniej ankiety
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="w-full box-border">
-                    <ol className="list-decimal w-full pl-4 space-y-2">
-                      {userData?.surveys[userData?.surveys.length - 1].tips.map(
-                        (tip) => (
-                          <li className="text-sm">{tip.description}</li>
-                        )
-                      )}
-                    </ol>
-                  </div>
-                </DialogContent>
-              </Dialog>
+              {userData?.surveys != null ? (
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant={"outline"}>Pokaż porady</Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Porady</DialogTitle>
+                      <DialogDescription>
+                        Porady do obnizenia śladu węglowego na podstawie twojej
+                        ostatniej ankiety
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="w-full box-border">
+                      <ol className="list-decimal w-full pl-4 space-y-2">
+                        {userData?.surveys[
+                          userData?.surveys.length - 1
+                        ].tips.map((tip, index) => (
+                          <li className="text-sm" key={`tip${index}`}>
+                            {tip.description}
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              ) : (
+                <Skeleton className="w-[100px] h-[30px]" />
+              )}
             </CardContent>
           </Card>
         </div>

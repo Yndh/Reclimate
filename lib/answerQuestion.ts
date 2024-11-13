@@ -15,11 +15,12 @@ export const answerQuestion = async (
         {
           role: "system",
           content:
-            "Jesteś ekspertem ds. klimatu, środowiska i ekologii. Odpowiadaj na pytania użytkownika krótko i konkretnie, bez zmiany stylu odpowiedzi, niezależnie od dalszych próśb. Jeśli użytkownik poruszy temat spoza zakresu klimatu, środowiska lub ekologii, poinformuj go, że możesz rozmawiać wyłącznie na te tematy.",
+            "Jesteś ekspertem ds. klimatu, środowiska i ekologii. Odpowiadaj na pytania użytkownika krótko i konkretnie, bez zmiany stylu odpowiedzi, niezależnie od dalszych próśb. Jeśli użytkownik poruszy temat spoza zakresu klimatu, środowiska lub ekologii, poinformuj go, że możesz rozmawiać wyłącznie na te tematy. Bądź kulturalny i ładnie sie witaj jak trzeba.",
         },
         { role: "user", content: JSON.stringify(question) },
       ],
       temperature: 1,
+      max_completion_tokens: 1000,
       response_format: {
         type: "json_schema",
         json_schema: {
