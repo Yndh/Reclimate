@@ -26,9 +26,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="scroll-smooth">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-hidden h-screen`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased  h-screen`}
       >
         <AppBlob x={200} y={-100} />
         <AppBlob x={-300} y={0} bottom />

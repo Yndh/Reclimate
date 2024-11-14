@@ -120,7 +120,7 @@ export default function CarbonPage() {
   };
 
   return (
-    <div className="w-full h-full p-8 overflow-y-scroll md:overflow-y-hidden">
+    <div className="w-full h-full p-8 overflow-y-scroll">
       <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-4 ">
         <Card className="order-2 md:order-1 lg:col-span-2">
           <CardHeader>

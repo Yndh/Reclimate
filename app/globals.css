@@ -60,7 +60,7 @@ body {
     --bg-start: rgb(4, 70, 50, 0.3);
     --bg-end: 170 46% 5%;
     --foreground: 0 0% 98%;
-    --card: 170 46% 5% 0.4;
+    --card: 170, 46%, 5%, 0.2;
     --card-foreground: 0 0% 98%;
     --popover: 170 46% 5%;
     --popover-foreground: 0 0% 98%;

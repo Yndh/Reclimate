@@ -41,15 +41,6 @@ import { redirect, usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import { Avatar } from "./ui/avatar";
 import { AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogDescription,
-} from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import logo from "@/app/logo.svg";
@@ -248,7 +239,7 @@ export function AppSidebar() {
                 height={40}
                 className="border-[1px] rounded-md border-border aspect-square"
               />
-              <span className="text-xl font-bold">Reclimate</span>
+              <span className="text-xl font-semibold">Reclimate</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
