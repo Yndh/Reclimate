@@ -15,7 +15,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
   const session = await auth();
   if (!session || !session.user) {
     return new NextResponse(
-      JSON.stringify({ error: "The user is not authenticated" }),
+      JSON.stringify({ error: "Użytkownik nie jest zalogowany" }),
       {
         status: 401,
       }
@@ -25,7 +25,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
   const challengeId = res.params.id;
   if (!challengeId) {
     return new NextResponse(
-      JSON.stringify({ error: "No id is provided in the URL parameters." }),
+      JSON.stringify({ error: "Nie podano id w parametrach adresu url" }),
       {
         status: 400,
       }
@@ -40,7 +40,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
 
   if (!challenge) {
     return new NextResponse(
-      JSON.stringify({ error: "Challenge doesnt exist" }),
+      JSON.stringify({ error: "Te wyzwanie nie istnieje" }),
       {
         status: 400,
       }
@@ -49,7 +49,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
 
   if (challenge.isCompleted) {
     return new NextResponse(
-      JSON.stringify({ error: "You can't update this challenge" }),
+      JSON.stringify({ error: "Nie możesz aktualizować tego wyzwania" }),
       {
         status: 403,
       }
@@ -63,7 +63,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
   if (timeLeft <= 0) {
     return new NextResponse(
       JSON.stringify({
-        error: "You can't update this challenge",
+        error: "Nie możesz aktualizować tego wyzwania",
       }),
       {
         status: 403,
@@ -76,7 +76,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
   if (completeTimeLeft > 0) {
     return new NextResponse(
       JSON.stringify({
-        error: "You can't update this challenge yet",
+        error: "Nie możesz jeszcze zaaktualizować tego wydarzenia",
       }),
       {
         status: 403,
@@ -109,10 +109,12 @@ export async function mPOST(req: Request, res: ResponseInterface) {
         status: 200,
       }
     );
-  } catch (e) {
-    console.error("Error updating challenge:", e);
+  } catch (err) {
+    console.error(`Error updating challenge: ${err}`);
     return new NextResponse(
-      JSON.stringify({ error: `Failed to update challenge` }),
+      JSON.stringify({
+        error: `Wystapił błąd w trakcie aktualizowania wyzwania. Spróbuj ponownie później`,
+      }),
       {
         status: 500,
       }

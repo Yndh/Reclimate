@@ -23,7 +23,7 @@ export async function mGET(req: NextApiRequest, res: NextApiResponse) {
   const session = await auth();
   if (!session || !session.user) {
     return new NextResponse(
-      JSON.stringify({ error: "The user is not authenticated" }),
+      JSON.stringify({ error: "Użytkownik nie jest zalogowany" }),
       {
         status: 401,
       }
@@ -132,6 +132,15 @@ export async function mGET(req: NextApiRequest, res: NextApiResponse) {
       }
     );
   } catch (err) {
-    console.error(`Error getting user data: ${err}`);
+    console.error(`Error getting user challenges: ${err}`);
+    return new NextResponse(
+      JSON.stringify({
+        error:
+          "Wystąpił błąd w trakcie pobierania wyzwań. Spróbuj ponownie później",
+      }),
+      {
+        status: 500,
+      }
+    );
   }
 }

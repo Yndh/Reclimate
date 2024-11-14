@@ -27,5 +27,14 @@ export async function mGET(req: NextApiRequest, res: NextApiResponse) {
     );
   } catch (err) {
     console.error(`Error getting user data: ${err}`);
+    return new NextResponse(
+      JSON.stringify({
+        error:
+          "Wystąpił błąd w trakcie pobierania rankingu. Spróbuj ponownie później",
+      }),
+      {
+        status: 500,
+      }
+    );
   }
 }

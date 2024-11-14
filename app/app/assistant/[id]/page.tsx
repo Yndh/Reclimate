@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Chat, Sender } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import { AppChat } from "@/components/app-chat";
+import { toast } from "@/hooks/use-toast";
 
 interface ChatPageInterface {
   params: { id: string };
@@ -14,29 +15,6 @@ interface MessageState {
   text: string;
   sender: Sender;
 }
-
-const questions: string[] = [
-  "Jak mogę zmniejszyć mój ślad węglowy na co dzień?",
-  "Jakie są najnowsze inicjatywy na rzecz ochrony klimatu?",
-  "Jakie skutki ma globalne ocieplenie dla mojego regionu?",
-  "Jakie rośliny najlepiej oczyszczają powietrze w domu?",
-  "Czy samochody elektryczne rzeczywiście są bardziej ekologiczne?",
-  "Jak działa recykling elektroniki i jak mogę w nim uczestniczyć?",
-  "Jakie kraje osiągają największe postępy w ograniczaniu emisji CO2?",
-  "Jakie są alternatywy dla plastiku jednorazowego użytku?",
-  "Jakie działania mogę podjąć, aby oszczędzać wodę w domu?",
-  "Co to jest bioróżnorodność i dlaczego jest ważna?",
-  "W jaki sposób rolnictwo wpływa na zmiany klimatyczne?",
-  "Jakie są najlepsze sposoby na ochronę pszczół i innych owadów zapylających?",
-  "Jakie organizacje mogę wspierać, aby przyczynić się do ochrony środowiska?",
-  "Jakie są najważniejsze zasady segregacji odpadów?",
-  "Jakie zmiany klimatyczne są prognozowane na nadchodzące lata?",
-  "Co oznacza neutralność klimatyczna i jak mogę ją wspierać?",
-  "Jakie są ekologiczne alternatywy dla produktów codziennego użytku?",
-  "Jak ograniczyć zużycie energii elektrycznej w moim domu?",
-  "Czym są gatunki inwazyjne i jak wpływają na środowisko?",
-  "Jakie są najbardziej zagrożone gatunki zwierząt i jak mogę im pomóc?",
-];
 
 export default function AsisstantChatPage({ params }: ChatPageInterface) {
   const { data: session } = useSession({
@@ -55,7 +33,10 @@ export default function AsisstantChatPage({ params }: ChatPageInterface) {
           .then((res) => res.json())
           .then((data) => {
             if (data.error) {
-              alert(data.error);
+              toast({
+                variant: "destructive",
+                description: data.error,
+              });
               router.replace("/app");
               return;
             }
@@ -73,7 +54,11 @@ export default function AsisstantChatPage({ params }: ChatPageInterface) {
             }
           });
       } catch (err) {
-        alert(err);
+        console.error(`Error geting chat: ${err}`);
+        toast({
+          variant: "destructive",
+          description: "Wystąpił problem w trakcie pobiernia czatu",
+        });
       }
     };
 

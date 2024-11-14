@@ -13,7 +13,7 @@ export async function mGET(req: Request, res: ResponseInterface) {
   const session = await auth();
   if (!session || !session.user) {
     return new NextResponse(
-      JSON.stringify({ error: "The user is not authenticated" }),
+      JSON.stringify({ error: "Użytkownik nie jest zalogowany.=" }),
       {
         status: 401,
       }
@@ -23,32 +23,48 @@ export async function mGET(req: Request, res: ResponseInterface) {
   const chatId = res.params.id;
   if (!chatId) {
     return new NextResponse(
-      JSON.stringify({ error: "No id is provided in the URL parameters." }),
+      JSON.stringify({ error: "Nie podano id w parametrach adresu url" }),
       {
         status: 400,
       }
     );
   }
-  const chat = await prisma.chat.findFirst({
-    where: { id: chatId, userId: session.user.id },
-    include: {
-      messages: true,
-      user: true,
-    },
-  });
-
-  if (!chat) {
-    return new NextResponse(JSON.stringify({ error: "Chat doesnt exist" }), {
-      status: 400,
+  try {
+    const chat = await prisma.chat.findFirst({
+      where: { id: chatId, userId: session.user.id },
+      include: {
+        messages: true,
+        user: true,
+      },
     });
-  }
 
-  return new NextResponse(
-    JSON.stringify({
-      chat: chat,
-    }),
-    {
-      status: 200,
+    if (!chat) {
+      return new NextResponse(
+        JSON.stringify({ error: "Ten czat nie istnieje" }),
+        {
+          status: 400,
+        }
+      );
     }
-  );
+
+    return new NextResponse(
+      JSON.stringify({
+        chat: chat,
+      }),
+      {
+        status: 200,
+      }
+    );
+  } catch (err) {
+    console.error(`Error getting chat: ${err}`);
+    return new NextResponse(
+      JSON.stringify({
+        error:
+          "Wystąpił błąd w trakcie znajdywania czatu. Spróbuj ponownie później",
+      }),
+      {
+        status: 500,
+      }
+    );
+  }
 }

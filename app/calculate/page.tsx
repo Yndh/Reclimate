@@ -2,15 +2,9 @@
 
 import AppSurvey from "@/components/survey";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Answer, Survey } from "@/lib/types";
-import { ChevronRight, Sparkles } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Survey } from "@/lib/types";
+import { Sparkles } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -22,6 +16,7 @@ import {
 } from "@/components/ui/chart";
 import { Bar, BarChart, XAxis, YAxis } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "@/hooks/use-toast";
 
 export interface Question {
   id: string;
@@ -74,19 +69,27 @@ export default function CalculatePage() {
         const res = await fetch("/api/survey")
           .then((res) => res.json())
           .then((data) => {
-            console.log(data);
+            if (data.error) {
+              toast({
+                variant: "destructive",
+                description: data.error,
+              });
+              router.replace("/app");
+            }
             if (data.id) {
               setSurveyId(data.id);
             }
             if (data.questions) {
               setQuestions(data.questions);
             }
-            if (data.error) {
-              router.replace("/app");
-            }
           });
-      } catch (e) {
-        console.log(e);
+      } catch (err) {
+        console.log(`Error getting survey: ${err}`);
+        toast({
+          variant: "destructive",
+          description: "Wystąpił błąd w trakcie pobiernia ankiety",
+        });
+        router.replace("/app");
       }
     };
     fetchSurveyData();
@@ -112,11 +115,24 @@ export default function CalculatePage() {
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log(data);
-          setSurveyResponse(data.survey);
+          if (data.error) {
+            toast({
+              variant: "destructive",
+              description: data.error,
+            });
+            return;
+          }
+
+          if (data.survey) {
+            setSurveyResponse(data.survey);
+          }
         });
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(`Error submiting survey: ${err}`);
+      toast({
+        variant: "destructive",
+        description: "Wystąpił błąd w trakcie przesyłanai ankiety",
+      });
     }
   };
 

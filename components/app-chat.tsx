@@ -8,6 +8,7 @@ import { SendHorizonal } from "lucide-react";
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import { Timer } from "./timer";
+import { toast } from "@/hooks/use-toast";
 
 export interface MessageState {
   text: string;
@@ -105,7 +106,10 @@ export const AppChat = ({
         .then((res) => res.json())
         .then((data) => {
           if (data.error) {
-            alert(data.error);
+            toast({
+              variant: "destructive",
+              description: data.error,
+            });
             if (data.refreshTime) {
               setRefreshTime(new Date(data.refreshTime));
             }
@@ -125,7 +129,11 @@ export const AppChat = ({
           setIsLoading(false);
         });
     } catch (err) {
-      alert(err);
+      console.error(`Error sending message: ${err}`);
+      toast({
+        variant: "destructive",
+        description: "Wystąpił błąd w trakcie wysyłania wiadomości",
+      });
     }
   };
 

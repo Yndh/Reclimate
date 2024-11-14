@@ -8,7 +8,7 @@ export async function mGET(req: NextApiRequest, res: NextApiResponse) {
   const session = await auth();
   if (!session || !session.user) {
     return new NextResponse(
-      JSON.stringify({ error: "The user is not authenticated" }),
+      JSON.stringify({ error: "Użytkownik nie jest zalogowany" }),
       {
         status: 401,
       }
@@ -31,7 +31,7 @@ export async function mGET(req: NextApiRequest, res: NextApiResponse) {
         });
       }
 
-      console.log(`Deleted ${emptyChats.length} empty chats.`);
+      console.log(`Deleted ${emptyChats.length} empty chats`);
     }
   } catch (err) {
     console.error(`Error cleaning up empty chats: ${err}`);
@@ -53,7 +53,9 @@ export async function mGET(req: NextApiRequest, res: NextApiResponse) {
   } catch (err) {
     console.error("Error getting user chats");
     return new NextResponse(
-      JSON.stringify({ error: `Failed to get user chats` }),
+      JSON.stringify({
+        error: `Wystąpił błąd w trakcie pobierania czatów. Spróbuj ponownie później`,
+      }),
       {
         status: 500,
       }

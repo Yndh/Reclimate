@@ -1,7 +1,6 @@
 "use client";
 
 import { AppTable } from "@/components/app-history-table";
-import { Button } from "@/components/ui/button";
 import { CartesianGrid, LabelList, Line, LineChart, XAxis } from "recharts";
 import {
   Card,
@@ -16,12 +15,12 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { SparklesIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Survey, User } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CalculateTimer } from "@/components/calculateTimer";
+import { toast } from "@/hooks/use-toast";
 
 const chartConfig = {
   footprint: {
@@ -50,7 +49,10 @@ export default function CarbonPage() {
           .then((res) => res.json())
           .then((data) => {
             if (data.error) {
-              alert(data.error);
+              toast({
+                variant: "destructive",
+                description: data.error,
+              });
               return;
             }
 
@@ -67,7 +69,12 @@ export default function CarbonPage() {
             }
           });
       } catch (err) {
-        console.error(err);
+        console.error(`Error getting user carbon data: ${err}`);
+        toast({
+          variant: "destructive",
+          description:
+            "Wystąpił problem w trakcie pobierania danych użytkownika",
+        });
       }
     };
 
@@ -80,7 +87,15 @@ export default function CarbonPage() {
         await fetch("/api/survey/cooldown")
           .then((res) => res.json())
           .then((data) => {
+            if (data.error) {
+              toast({
+                variant: "destructive",
+                description: data.error,
+              });
+              return;
+            }
             setCooldownLoading(false);
+
             if (data.refreshTime) {
               setRefreshTime(new Date(data.refreshTime));
             }
@@ -89,7 +104,11 @@ export default function CarbonPage() {
             }
           });
       } catch (err) {
-        console.error(err);
+        console.error(`Error getting cooldown: ${err}`);
+        toast({
+          variant: "destructive",
+          description: "Wystąpił problem w trakcie pobierania czasu odnowienia",
+        });
       }
     };
 

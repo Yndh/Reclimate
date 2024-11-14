@@ -22,7 +22,7 @@ export async function mGET(req: NextApiRequest, res: NextApiResponse) {
   const session = await auth();
   if (!session || !session.user) {
     return new NextResponse(
-      JSON.stringify({ error: "The user is not authenticated" }),
+      JSON.stringify({ error: "Użytkownik nie jest zalogowany" }),
       {
         status: 401,
       }
@@ -73,10 +73,15 @@ export async function mGET(req: NextApiRequest, res: NextApiResponse) {
         status: 200,
       }
     );
-  } catch (e) {
-    console.error("Error:", e);
-    return new NextResponse(JSON.stringify({ error: `Server error` }), {
-      status: 500,
-    });
+  } catch (err) {
+    console.error(`Error getting cooldown ${err}:`);
+    return new NextResponse(
+      JSON.stringify({
+        error: `Wystąpił błąd w trakcie pobierania daty odnowienia ankiety. Spróbuj ponownie później`,
+      }),
+      {
+        status: 500,
+      }
+    );
   }
 }

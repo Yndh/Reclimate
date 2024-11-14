@@ -1,6 +1,5 @@
 "use client";
 
-import { AppTable } from "@/components/app-history-table";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,8 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Check, CheckCircle2, SparklesIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Check, CheckCircle2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Challenge, User } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -22,6 +20,7 @@ import {
 import { AppChallengesTable } from "@/components/app-challenges-table";
 import { Timer } from "@/components/timer";
 import { CompleteTimer } from "@/components/completeTimer";
+import { toast } from "@/hooks/use-toast";
 
 export default function CarbonPage() {
   const [userData, setUserData] = useState<User>();
@@ -34,7 +33,10 @@ export default function CarbonPage() {
           .then((res) => res.json())
           .then((data) => {
             if (data.error) {
-              alert(data.error);
+              toast({
+                variant: "destructive",
+                description: data.error,
+              });
               return;
             }
 
@@ -50,7 +52,11 @@ export default function CarbonPage() {
             }
           });
       } catch (err) {
-        console.error(err);
+        console.error(`Error getting user challenges: ${err}`);
+        toast({
+          variant: "destructive",
+          description: "Wystąpił błąd w trakcie pobierania danych użytkownika",
+        });
       }
     };
 
@@ -80,7 +86,10 @@ export default function CarbonPage() {
         .then((res) => res.json())
         .then((data) => {
           if (data.error) {
-            alert(data.error);
+            toast({
+              variant: "destructive",
+              description: data.error,
+            });
             return;
           }
 
@@ -102,7 +111,11 @@ export default function CarbonPage() {
           }
         });
     } catch (err) {
-      console.error(err);
+      console.error(`Error updating challenge: ${err}`);
+      toast({
+        variant: "destructive",
+        description: "Wystąpił błąd w trakcie aktualizowania wyzwania",
+      });
     }
   };
 

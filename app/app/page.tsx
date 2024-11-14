@@ -24,7 +24,6 @@ import {
 import { useEffect, useState } from "react";
 import { Challenge, Survey, User } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useRouter } from "next/navigation";
 import { Check, CheckCircle2 } from "lucide-react";
 import {
   Dialog,
@@ -36,6 +35,7 @@ import {
 } from "@/components/ui/dialog";
 import { CompleteTimer } from "@/components/completeTimer";
 import { Timer } from "@/components/timer";
+import { toast } from "@/hooks/use-toast";
 
 const chartConfig = {
   footprint: {
@@ -57,7 +57,7 @@ export default function AppPage() {
   const [userData, setUserData] = useState<User>();
   const [chartData, setChartData] = useState<ChartData[]>([]);
   const [completeDate, setCompleteDate] = useState<Date>();
-  const router = useRouter();
+  const [tipsClick, setTipsClick] = useState(0);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -66,7 +66,10 @@ export default function AppPage() {
           .then((res) => res.json())
           .then((data) => {
             if (data.error) {
-              alert(data.error);
+              toast({
+                variant: "destructive",
+                description: data.error,
+              });
               return;
             }
 
@@ -88,7 +91,11 @@ export default function AppPage() {
             }
           });
       } catch (err) {
-        console.error(err);
+        console.error(`User data fetch error: ${err}`);
+        toast({
+          variant: "destructive",
+          description: "Wystąpił błąd w trakcie pobierania danych użytkownika",
+        });
       }
     };
 
@@ -103,7 +110,10 @@ export default function AppPage() {
         .then((res) => res.json())
         .then((data) => {
           if (data.error) {
-            alert(data.error);
+            toast({
+              variant: "destructive",
+              description: data.error,
+            });
             return;
           }
 
@@ -126,6 +136,10 @@ export default function AppPage() {
         });
     } catch (err) {
       console.error(err);
+      toast({
+        variant: "destructive",
+        description: "Wystąpił błąd w tarkcie aktualizowania wyzwania",
+      });
     }
   };
 
@@ -172,8 +186,8 @@ export default function AppPage() {
       <div className="w-full text-4xl md:text-5xl font-semibold py-4">
         <p>Dashboard</p>
       </div>
-      <div className="flex flex-1 flex-col w-full gap-4 lg:overflow-y-hidden overflow-y-auto">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 w-full">
+      <div className="flex flex-1 flex-col w-full gap-4 overflow-y-auto">
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-3 w-full">
           <Card>
             <CardHeader>
               <CardTitle>Ślad węglowy</CardTitle>
@@ -213,7 +227,16 @@ export default function AppPage() {
               {userData?.surveys != null ? (
                 <Dialog>
                   <DialogTrigger asChild>
-                    <Button variant={"outline"}>Pokaż porady</Button>
+                    <Button
+                      variant={"outline"}
+                      onClick={() => {
+                        if (tipsClick < 2) {
+                          setTipsClick(tipsClick + 1);
+                        }
+                      }}
+                    >
+                      Pokaż porady
+                    </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
@@ -228,7 +251,14 @@ export default function AppPage() {
                         {userData?.surveys[
                           userData?.surveys.length - 1
                         ].tips.map((tip, index) => (
-                          <li className="text-sm" key={`tip${index}`}>
+                          <li
+                            className={`text-sm ${
+                              tipsClick == 1
+                                ? "gradient-text duration-1000"
+                                : ""
+                            }`}
+                            key={`tip${index}`}
+                          >
                             {tip.description}
                           </li>
                         ))}

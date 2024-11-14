@@ -8,6 +8,7 @@ import { PopoverClose } from "@radix-ui/react-popover";
 import { useEffect, useState } from "react";
 import { Chat } from "@/lib/types";
 import { usePathname } from "next/navigation";
+import { toast } from "@/hooks/use-toast";
 
 export const ChatPopup = () => {
   const [chat, setChat] = useState<MessageState[]>([]);
@@ -40,8 +41,10 @@ export const ChatPopup = () => {
         .then((res) => res.json())
         .then((data) => {
           if (data.error) {
-            alert(data.error);
-
+            toast({
+              variant: "destructive",
+              description: data.error,
+            });
             return;
           }
 
@@ -59,14 +62,18 @@ export const ChatPopup = () => {
           }
         });
     } catch (err) {
-      alert(err);
+      console.error(`Error fetching chat: ${err}`);
+      toast({
+        variant: "destructive",
+        description: "Wystąpił błąd w trakcie pobierania czatu",
+      });
     }
   };
 
   if (isVisible) {
     return (
       <Popover>
-        <PopoverTrigger asChild className="fixed bottom-4 right-4 z-10">
+        <PopoverTrigger asChild className="fixed bottom-0 right-0 z-10 m-4">
           <Button
             className="hover-gradient-border p-0 w-[60px] h-[60px] aspect-square rounded-full"
             variant={"outline"}

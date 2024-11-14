@@ -23,7 +23,7 @@ export async function mGET(req: NextApiRequest, res: NextApiResponse) {
   const session = await auth();
   if (!session || !session.user) {
     return new NextResponse(
-      JSON.stringify({ error: "The user is not authenticated" }),
+      JSON.stringify({ error: "Użytkownik nie jest zalogowany" }),
       {
         status: 401,
       }
@@ -55,8 +55,7 @@ export async function mGET(req: NextApiRequest, res: NextApiResponse) {
       if (Date.now() < refreshTime.getTime()) {
         return new NextResponse(
           JSON.stringify({
-            error:
-              "You must wait for the cooldown period to complete before starting the next survey",
+            error: "Musisz poczekać zanim utworzysz następna ankietę",
             refreshTime: refreshTime.toISOString,
           }),
           {
@@ -91,7 +90,7 @@ export async function mGET(req: NextApiRequest, res: NextApiResponse) {
       if (!lastSurvey) {
         return new NextResponse(
           JSON.stringify({
-            error: "You cant access this survey",
+            error: "Nie masz dostępu do tej ankiety",
           }),
           {
             status: 405,
@@ -109,7 +108,8 @@ export async function mGET(req: NextApiRequest, res: NextApiResponse) {
       if (questions.length == 0) {
         return new NextResponse(
           JSON.stringify({
-            error: "Server error",
+            error:
+              "Wystąpił błąd w trakcie generowania ankiety. Spróbuj ponownie później",
           }),
           {
             status: 500,
@@ -182,10 +182,12 @@ export async function mGET(req: NextApiRequest, res: NextApiResponse) {
         status: 200,
       }
     );
-  } catch (e) {
-    console.error("Error generating survey:", e);
+  } catch (err) {
+    console.error(`Error generating survey ${err}:`);
     return new NextResponse(
-      JSON.stringify({ error: `Failed generating survey` }),
+      JSON.stringify({
+        error: `Wystąpił błąd w trakcie generowania ankiety. Spróbuj ponownie później`,
+      }),
       {
         status: 500,
       }

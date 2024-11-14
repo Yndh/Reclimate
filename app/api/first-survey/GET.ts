@@ -19,7 +19,7 @@ export async function mGET(req: NextApiRequest, res: NextApiResponse) {
   const session = await auth();
   if (!session || !session.user) {
     return new NextResponse(
-      JSON.stringify({ error: "The user is not authenticated" }),
+      JSON.stringify({ error: "Użytkownik nie jest zalogowany" }),
       {
         status: 401,
       }
@@ -48,7 +48,7 @@ export async function mGET(req: NextApiRequest, res: NextApiResponse) {
 
     if ((user?.carbonFootprint as number) > 0) {
       return new NextResponse(
-        JSON.stringify({ error: `You can't access this survey` }),
+        JSON.stringify({ error: `Nie masz dostępu do tej ankiety` }),
         {
           status: 403,
         }
@@ -209,10 +209,12 @@ export async function mGET(req: NextApiRequest, res: NextApiResponse) {
         status: 200,
       }
     );
-  } catch (e) {
-    console.error("Error generating survey:", e);
+  } catch (err) {
+    console.error(`Error generating survey: ${err}`);
     return new NextResponse(
-      JSON.stringify({ error: `Failed generating survey` }),
+      JSON.stringify({
+        error: `Wystąpił błąd w trakcie generowania ankiety. Spróbuj ponownie później`,
+      }),
       {
         status: 500,
       }

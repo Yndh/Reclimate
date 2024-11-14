@@ -24,7 +24,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
   const session = await auth();
   if (!session || !session.user) {
     return new NextResponse(
-      JSON.stringify({ error: "The user is not authenticated" }),
+      JSON.stringify({ error: "Użytkownik nie jest zalogowany" }),
       {
         status: 401,
       }
@@ -34,7 +34,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
   const chatId = res.params.id;
   if (!chatId) {
     return new NextResponse(
-      JSON.stringify({ error: "No id is provided in the URL parameters." }),
+      JSON.stringify({ error: "Nie podano id w parametrach adresu url" }),
       {
         status: 400,
       }
@@ -49,9 +49,12 @@ export async function mPOST(req: Request, res: ResponseInterface) {
   });
 
   if (!chat) {
-    return new NextResponse(JSON.stringify({ error: "Chat doesnt exist" }), {
-      status: 400,
-    });
+    return new NextResponse(
+      JSON.stringify({ error: "Ten czat nie istnieje" }),
+      {
+        status: 400,
+      }
+    );
   }
 
   const startOfDay = new Date();
@@ -75,7 +78,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
     (sum, message) => (sum += message.tokens || 0),
     0
   );
-  console.log(`${session.user.id} used ${totalTokens} output tokens today`);
+
   if (totalTokens > TOKENS_LIMIT) {
     const nextDay = new Date();
     nextDay.setDate(nextDay.getDate() + 1);
@@ -83,7 +86,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
 
     return new NextResponse(
       JSON.stringify({
-        error: "You must wait for the cooldown period to use assistant",
+        error: "Przekroczyłeś dzienny limit asystenta",
         refreshTime: nextDay.toISOString(),
       }),
       {
@@ -98,7 +101,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
   if (message.trim().length > 400) {
     return new NextResponse(
       JSON.stringify({
-        error: "Message length exceeds the 400 character limit.",
+        error: "Długość wiadomości przekracza limit 400 znaków",
       }),
       { status: 400 }
     );
@@ -147,10 +150,12 @@ export async function mPOST(req: Request, res: ResponseInterface) {
         message: aiMessage,
       })
     );
-  } catch (e) {
-    console.error("Error submiting survey:", e);
+  } catch (err) {
+    console.error(`Error generating answer: ${err}`);
     return new NextResponse(
-      JSON.stringify({ error: `Failed to update survey` }),
+      JSON.stringify({
+        error: `Wystąpił błąd w trakcie generowania odpowiedzi. Spróbuj ponownie później`,
+      }),
       {
         status: 500,
       }
