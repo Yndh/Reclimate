@@ -67,7 +67,7 @@ model VerificationToken {
 model Survey {
   id              String     @id @default(cuid())
   userId          String
-  user            User       @relation(name: "UserSurveys", fields: [userId], references: [id])
+  user            User       @relation(name: "UserSurveys", fields: [userId], references: [id], onDelete: Cascade)
   responses       Response[]
   tips            Tip[]
   carbonFootprint Float?
@@ -114,7 +114,7 @@ model Tip {
 model Challenge {
   id          String   @id @default(cuid())
   userId      String
-  user        User     @relation(fields: [userId], references: [id])
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   title       String
   description String
   points      Int
@@ -129,7 +129,7 @@ model Challenge {
 model Chat {
   id       String    @id @default(cuid())
   userId   String
-  user     User      @relation(fields: [userId], references: [id])
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   messages Message[]
 
   createdAt DateTime @default(now())

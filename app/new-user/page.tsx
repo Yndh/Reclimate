@@ -164,7 +164,7 @@ export default function NewUserPage() {
                   Witaj, {session?.user?.name}!
                 </h2>
                 <p className="text-base text-muted-foreground">
-                  &quot;Hakhiros2&quot; to innowacyjna aplikacja, która pomaga
+                  &quot;Reclimate&quot; to innowacyjna aplikacja, która pomaga
                   użytkownikom zrozumieć wpływ ich stylu życia na środowisko.
                   Dzięki interaktywnym narzędziom zwiększamy świadomość
                   ekologiczną i pomagamy w podejmowaniu bardziej zrównoważonych
