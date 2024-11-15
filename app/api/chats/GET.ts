@@ -29,8 +29,6 @@ export async function mGET(req: NextRequest, res: NextApiResponse) {
           where: { id: chat.id },
         });
       }
-
-      console.log(`Deleted ${emptyChats.length} empty chats`);
     }
   } catch (err) {
     console.error(`Error cleaning up empty chats: ${err}`);
