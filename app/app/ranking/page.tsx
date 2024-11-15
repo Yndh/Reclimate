@@ -1,4 +1,5 @@
 import { AppRanking, Leaderboard } from "@/components/app-points-ranking";
+import { Button } from "@/components/ui/button";
 
 const leaderboard: Leaderboard[] = [
   {
@@ -64,10 +65,17 @@ const leaderboard: Leaderboard[] = [
 ];
 
 export default async function RankingPage() {
-  const res = await fetch(`${process.env.URL}/api/ranking`);
+  const res = await fetch(`${process.env.URL}/api/rankingg`);
 
   if (!res.ok) {
-    // handle error
+    return (
+      <div className="w-full h-full p-8 flex flex-col justify-center items-center">
+        <h1 className="text-xl font-semibold">
+          Wystąpił błąd w trakcie wczytywania rankingu
+        </h1>
+        <p className="text-muted-foreground">Spróbuj ponownie później</p>
+      </div>
+    );
   }
 
   const data = await res.json();

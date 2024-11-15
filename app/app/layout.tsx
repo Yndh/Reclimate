@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Separator } from "@/components/ui/separator";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { SessionProvider } from "next-auth/react";
+import { Suspense } from "react";
 
 export default function Layout({
   children,
@@ -28,7 +29,7 @@ export default function Layout({
               </div>
               <ModeToggle />
             </div>
-            {children}
+            <Suspense>{children}</Suspense>
             <ChatPopup />
           </main>
         </SidebarProvider>

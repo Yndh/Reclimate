@@ -16,9 +16,12 @@ export default function SignInPage() {
     <div className="flex justify-center items-center h-screen w-screen">
       <Card className="mx-auto max-w-sm">
         <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
+          <CardTitle className="text-2xl">
+            Zaloguj się, aby kontynuować
+          </CardTitle>
           <CardDescription>
-            Choose your OAuth method to login to your account
+            Wybierz jedną z metod logowania, aby rozpocząć korzystanie z
+            aplikacji
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -29,7 +32,7 @@ export default function SignInPage() {
                 signIn("github", { redirectTo: "/app" });
               }}
             >
-              <GitHubLogoIcon /> Login with Github
+              <GitHubLogoIcon /> Zaloguj się przez Github
             </Button>
             <Button
               variant="outline"
@@ -39,7 +42,7 @@ export default function SignInPage() {
               }}
             >
               <span className="font-semibold">G</span>
-              Login with Google
+              Zaloguj się przez Google
             </Button>
           </div>
         </CardContent>
