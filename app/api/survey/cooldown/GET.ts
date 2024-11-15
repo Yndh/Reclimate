@@ -1,9 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Survey } from "@/lib/types";
-import { error } from "console";
-import { NextApiRequest, NextApiResponse } from "next";
-import { NextResponse } from "next/server";
+import { NextApiResponse } from "next";
+import { NextRequest, NextResponse } from "next/server";
 
 interface Question {
   id?: string;
@@ -18,7 +16,7 @@ interface Option {
 
 const SURVEY_COOLDOWN = (process.env.SURVEY_COOLDOWN ?? 0) as number; // hours
 
-export async function mGET(req: NextApiRequest, res: NextApiResponse) {
+export async function mGET(req: NextRequest, res: NextApiResponse) {
   const session = await auth();
   if (!session || !session.user) {
     return new NextResponse(

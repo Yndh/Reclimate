@@ -1,6 +1,5 @@
 "use client";
 
-import { Answer, Survey } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Progress } from "./ui/progress";
 import { SetStateAction, useState } from "react";

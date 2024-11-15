@@ -64,7 +64,7 @@ const leaderboard: Leaderboard[] = [
 ];
 
 export default async function RankingPage() {
-  let res = await fetch(`${process.env.URL}/api/ranking`);
+  const res = await fetch(`${process.env.URL}/api/ranking`);
 
   if (!res.ok) {
     // handle error

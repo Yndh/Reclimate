@@ -16,19 +16,19 @@ interface NavItem {
 const navItems: NavItem[] = [
   {
     title: "Nasza misja",
-    url: "#about",
+    url: "/#about",
   },
   {
     title: "Funkcje",
-    url: "#app",
+    url: "/#app",
   },
   {
     title: "FAQ",
-    url: "#faq",
+    url: "/#faq",
   },
   {
     title: "Dołącz teraz",
-    url: "#join",
+    url: "/#join",
   },
 ];
 
@@ -54,8 +54,10 @@ export const Navbar = () => {
         <span className="text-xl font-semibold hidden md:block">Reclimate</span>
       </div>
       <div className="flex items-center gap-4 text-center">
-        {navItems.map((item) => (
-          <Link href={item.url}>{item.title}</Link>
+        {navItems.map((item, index) => (
+          <Link href={item.url} key={`key${index}`}>
+            {item.title}
+          </Link>
         ))}
       </div>
       <Button

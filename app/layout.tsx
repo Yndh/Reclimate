@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
 import { AppBlob } from "@/components/app-blob";
 import { Toaster } from "@/components/ui/toaster";
 
@@ -27,17 +26,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en" className="scroll-smooth dark">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased  h-screen`}
       >
         <AppBlob x={200} y={-100} />
         <AppBlob x={-300} y={0} bottom />
         <AppBlob side="right" x={10} y={10} bottom />
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          {children}
-          <Toaster />
-        </ThemeProvider>
+        {children}
+        <Toaster />
       </body>
     </html>
   );

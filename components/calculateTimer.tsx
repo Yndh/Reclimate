@@ -24,12 +24,12 @@ export const CalculateTimer = React.memo(({ targetDate }: TimerProps) => {
       const completeRemaining = completeDate.getTime() - now.getTime();
 
       if (completeRemaining > 0) {
-        let days = Math.floor(completeRemaining / (1000 * 60 * 60 * 24));
-        let hours = Math.floor((completeRemaining / (1000 * 60 * 60)) % 24);
-        let minutes = Math.floor(
+        const days = Math.floor(completeRemaining / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((completeRemaining / (1000 * 60 * 60)) % 24);
+        const minutes = Math.floor(
           (completeRemaining % (1000 * 60 * 60)) / (1000 * 60)
         );
-        let seconds = Math.floor((completeRemaining % (1000 * 60)) / 1000);
+        const seconds = Math.floor((completeRemaining % (1000 * 60)) / 1000);
 
         setCompleteLeft(
           `${days.toString().padStart(2, "0")}:${hours
@@ -74,3 +74,4 @@ export const CalculateTimer = React.memo(({ targetDate }: TimerProps) => {
     </div>
   );
 });
+CalculateTimer.displayName = "CalculateTimer";

@@ -29,7 +29,7 @@ export interface Response {
   id: string;
   surveyId: string;
   survey: Survey;
-  question: String;
+  question: string;
   answers: Answer[];
   answer?: Answer;
 

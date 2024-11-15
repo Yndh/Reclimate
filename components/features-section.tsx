@@ -108,6 +108,7 @@ export const FeatureOne = () => {
           className={`w-2/3 hover:scale-105 duration-300 cursor-pointer ${
             index != 0 ? "ml-auto w-1/2" : ""
           }`}
+          key={`ft1${index}`}
         />
       ))}
     </div>
@@ -126,6 +127,7 @@ export const FeatureTwo = () => {
           className={`${
             index % 2 != 0 ? "translate-x-8" : "-translate-x-4"
           } hover:scale-105 duration-300 cursor-pointer`}
+          key={`ft2${index}`}
         />
       ))}
     </div>
@@ -143,6 +145,7 @@ export const FeatureThree = () => {
           className={`w-full hover:scale-105 duration-300 cursor-pointer ${
             index != 0 ? "translate-x-6 hover:scale-125 !w-[400px] ml-auto" : ""
           }`}
+          key={`ft3${index}`}
         />
       ))}
     </div>
@@ -160,6 +163,7 @@ export const FeatureFour = () => {
           className={`w-[300px] hover:scale-105 duration-300 cursor-pointer ${
             index != 0 ? "ml-auto w-[250px]" : ""
           }`}
+          key={`ft4${index}`}
         />
       ))}
     </div>

@@ -1,10 +1,7 @@
-import { SurveyAnswer } from "@/app/new-user/page";
 import { AiMessage, answerQuestion } from "@/lib/answerQuestion";
 import { auth } from "@/lib/auth";
-import { calculateFootprint } from "@/lib/calculateFootprint";
 import { prisma } from "@/lib/prisma";
 import { Sender } from "@/lib/types";
-import { error } from "console";
 import { NextApiResponse } from "next";
 import { NextResponse } from "next/server";
 

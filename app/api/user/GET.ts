@@ -1,8 +1,8 @@
 import { auth } from "@/lib/auth";
 import { generateChallenges } from "@/lib/generateChallenges";
 import { prisma } from "@/lib/prisma";
-import { NextApiRequest, NextApiResponse } from "next";
-import { NextResponse } from "next/server";
+import { NextApiResponse } from "next";
+import { NextRequest, NextResponse } from "next/server";
 
 const getWeekStartAndEnd = (): { start: Date; end: Date } => {
   const now = new Date();
@@ -19,7 +19,7 @@ const getWeekStartAndEnd = (): { start: Date; end: Date } => {
   return { start, end };
 };
 
-export async function mGET(req: NextApiRequest, res: NextApiResponse) {
+export async function mGET(req: NextRequest, res: NextApiResponse) {
   const session = await auth();
   if (!session || !session.user) {
     return new NextResponse(
@@ -33,7 +33,7 @@ export async function mGET(req: NextApiRequest, res: NextApiResponse) {
   const { start, end } = getWeekStartAndEnd();
 
   try {
-    let user = await prisma.user.findFirst({
+    const user = await prisma.user.findFirst({
       where: { id: session.user.id },
       include: {
         challenges: {

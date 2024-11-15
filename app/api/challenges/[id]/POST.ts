@@ -1,6 +1,4 @@
-import { SurveyAnswer } from "@/app/new-user/page";
 import { auth } from "@/lib/auth";
-import { calculateFootprint } from "@/lib/calculateFootprint";
 import { prisma } from "@/lib/prisma";
 import { NextApiResponse } from "next";
 import { NextResponse } from "next/server";

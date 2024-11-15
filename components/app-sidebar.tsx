@@ -40,7 +40,6 @@ import { redirect, usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import { Avatar } from "./ui/avatar";
 import { AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
-import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import logo from "@/app/logo.svg";
 import logoLight from "@/app/logo-light.svg";

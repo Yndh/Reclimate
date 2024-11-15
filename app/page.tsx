@@ -163,7 +163,7 @@ export default function Home() {
 
         <Accordion type="single" collapsible className="w-full text-left">
           {faqData.map((question, index) => (
-            <AccordionItem value={`item-${index}`}>
+            <AccordionItem value={`item-${index}`} key={`acc${index}`}>
               <AccordionTrigger>{question.question}</AccordionTrigger>
               <AccordionContent>{question.answer}</AccordionContent>
             </AccordionItem>

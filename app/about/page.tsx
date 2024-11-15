@@ -1,6 +1,5 @@
 import { Navbar } from "@/components/navbar";
 import Image, { StaticImageData } from "next/image";
-import testImage from "@/assets/test.png";
 import nextLogo from "@/assets/nextLogo.png";
 import reactLogo from "@/assets/reactLogo.png";
 import gptLogo from "@/assets/gptLogo.png";
@@ -118,8 +117,11 @@ const questions: Question[] = [
           "Aplikacja została stworzona z wykorzystaniem najnowszych i szybkich technologiach webowych, co umożliwia jej łatwą dostępność na różnych urządzeniach (takich jak komputery, smartfony czy tablety)",
         child: (
           <div className="w-full flex flex-row justify-between items-center flex-wrap text-center mt-4">
-            {logos.map((logo) => (
-              <div className="flex flex-col items-center justify-center gap-2 ">
+            {logos.map((logo, index) => (
+              <div
+                className="flex flex-col items-center justify-center gap-2 "
+                key={`logo${index}`}
+              >
                 <Image
                   src={logo.image}
                   alt="tech logo"
@@ -296,8 +298,8 @@ export default function Home() {
 
         <div className="flex flex-col gap-4 text-left w-full">
           <ul className="list-decimal marker:font-semibold marker:text-xl space-y-8 ml-4">
-            {questions.map((question) => (
-              <li className="space-y-2">
+            {questions.map((question, index) => (
+              <li className="space-y-2" key={`li${index}`}>
                 <h2 className="text-xl font-semibold">{question.title}</h2>
                 {question.subtitle && (
                   <p className="italic text-muted-foreground">
@@ -306,14 +308,14 @@ export default function Home() {
                 )}
                 {question.items && (
                   <div className="w-full space-y-4">
-                    {question.items.map((questionitem) => (
-                      <div className="w-full">
+                    {question.items.map((questionitem, index) => (
+                      <div className="w-full" key={`d${index}`}>
                         <span>{questionitem.content}</span>
                         {questionitem.child && questionitem.child}
                         {questionitem.items && (
                           <ul className="list-disc ml-4 space-y-2">
-                            {questionitem.items.map((item) => (
-                              <li>
+                            {questionitem.items.map((item, index) => (
+                              <li key={`item${index}`}>
                                 <span>
                                   {item.title && (
                                     <span className="font-semibold">

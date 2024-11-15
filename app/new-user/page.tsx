@@ -2,14 +2,8 @@
 
 import AppSurvey from "@/components/survey";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Answer, Survey } from "@/lib/types";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Survey } from "@/lib/types";
 import { ChevronRight, Sparkles } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -170,7 +164,7 @@ export default function NewUserPage() {
                   Witaj, {session?.user?.name}!
                 </h2>
                 <p className="text-base text-muted-foreground">
-                  „Hakhiros2" to innowacyjna aplikacja, która pomaga
+                  &quot;Hakhiros2&quot; to innowacyjna aplikacja, która pomaga
                   użytkownikom zrozumieć wpływ ich stylu życia na środowisko.
                   Dzięki interaktywnym narzędziom zwiększamy świadomość
                   ekologiczną i pomagamy w podejmowaniu bardziej zrównoważonych
