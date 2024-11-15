@@ -1,36 +1,51 @@
+"use client";
+
+import React, { useEffect, useState } from "react";
 import { AppRanking, Leaderboard } from "@/components/app-points-ranking";
 
-export default async function RankingPage() {
-  try {
-    const res = await fetch(`${process.env.URL}/api/ranking`);
+export default function RankingPage() {
+  const [users, setUsers] = useState<Leaderboard[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-    if (!res.ok) {
-      throw new Error("Failed to fetch ranking data");
-    }
+  useEffect(() => {
+    const fetchRankingData = async () => {
+      try {
+        const res = await fetch(`/api/ranking`);
 
-    const data = await res.json();
+        if (!res.ok) {
+          throw new Error("Failed to fetch ranking data");
+        }
 
-    const { users }: { users: Leaderboard[] } = data;
-    users.sort((a, b) => b.points - a.points);
+        const data = await res.json();
+        const { users }: { users: Leaderboard[] } = data;
+        users.sort((a, b) => b.points - a.points);
+        setUsers(users);
+      } catch (err) {
+        console.error(`Error fetching ranking data: ${err}`);
+        setError(
+          "Wystąpił błąd w trakcie wczytywania rankingu. Spróbuj ponownie później."
+        );
+      }
+    };
 
+    fetchRankingData();
+  }, []);
+
+  if (error) {
     return (
-      <div className="w-full h-full p-8">
-        <div className="w-full text-4xl md:text-5xl font-semibold py-4">
-          <p>Ranking</p>
-        </div>
-
-        <AppRanking data={users} />
-      </div>
-    );
-  } catch (err) {
-    console.log(`SSR Ranking fetch error: ${err}`);
-    return (
-      <div className="w-full h-full p-8 flex flex-col justify-center items-center">
-        <h1 className="text-xl font-semibold">
-          Wystąpił błąd w trakcie wczytywania rankingu
-        </h1>
-        <p className="text-muted-foreground">Spróbuj ponownie później</p>
+      <div className="w-full h-full p-8 flex flex-col justify-center items-center text-center">
+        <h1 className="text-xl font-semibold w-full">{error}</h1>
       </div>
     );
   }
+
+  return (
+    <div className="w-full h-full p-8">
+      <div className="w-full text-4xl md:text-5xl font-semibold py-4">
+        <p>Ranking</p>
+      </div>
+
+      <AppRanking data={users} />
+    </div>
+  );
 }

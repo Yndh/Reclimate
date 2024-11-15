@@ -32,8 +32,6 @@ export const ChatPopup = () => {
       return;
     }
 
-    console.log("fetching");
-
     try {
       await fetch("/api/chats", {
         method: "POST",

@@ -139,8 +139,6 @@ export function AppSidebar() {
   const [navItems, setNavItems] = useState(initNavItems);
   const [isCreating, setIsCreating] = useState(false);
 
-  console.log(session?.user);
-
   useEffect(() => {
     const fetchChats = async () => {
       try {
@@ -148,7 +146,6 @@ export function AppSidebar() {
           .then((res) => res.json())
           .then((data) => {
             if (data.error) {
-              alert(data.error);
               toast({
                 variant: "destructive",
                 description: data.error,
@@ -218,7 +215,7 @@ export function AppSidebar() {
           }
         });
     } catch (err) {
-      alert(`Error creating chat: ${err}`);
+      console.error(`Error creating chat: ${err}`);
       toast({
         variant: "destructive",
         description: "Wystąpił błąd w trakcie tworzenia czatu",

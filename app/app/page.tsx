@@ -139,7 +139,7 @@ export default function AppPage() {
           }
         });
     } catch (err) {
-      console.error(err);
+      console.error(`Update error: ${err}`);
       toast({
         variant: "destructive",
         description: "Wystąpił błąd w tarkcie aktualizowania wyzwania",
