@@ -6,6 +6,7 @@ import { Progress } from "./ui/progress";
 import { SetStateAction, useState } from "react";
 import { Button } from "./ui/button";
 import { Option, Question, SurveyAnswer } from "@/app/new-user/page";
+import { toast } from "@/hooks/use-toast";
 
 interface AppSurveyProps {
   questions: Question[];
@@ -45,11 +46,21 @@ export default function AppSurvey({
 
       return updatedAnswers;
     });
-
-    console.log(answers);
   };
 
   const incrementQuestionIndex = () => {
+    const currentQuestionId = questions[questionIndex].id;
+    const hasAnswered = answers.some((ans) => ans.id === currentQuestionId);
+
+    if (!hasAnswered) {
+      toast({
+        variant: "destructive",
+        description: "Wybierz odpowiedź zanim przejdziesz dalej",
+        duration: 2000,
+      });
+      return;
+    }
+
     if (questionIndex < questions.length - 1) {
       setQuestionIndex(questionIndex + 1);
     } else {

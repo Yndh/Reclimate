@@ -1,5 +1,5 @@
 import { SurveyAnswer } from "@/app/new-user/page";
-import { answerQuestion } from "@/lib/answerQuestion";
+import { AiMessage, answerQuestion } from "@/lib/answerQuestion";
 import { auth } from "@/lib/auth";
 import { calculateFootprint } from "@/lib/calculateFootprint";
 import { prisma } from "@/lib/prisma";
@@ -108,7 +108,21 @@ export async function mPOST(req: Request, res: ResponseInterface) {
   }
 
   try {
-    const { message: answer, output_tokens } = await answerQuestion(message);
+    const chatHistory: AiMessage[] = chat.messages
+      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+      .map((message) => ({
+        role: message.sender === Sender.USER ? "user" : "assistant",
+        content: message.text,
+      }));
+
+    const updatedChatHistory: AiMessage[] = [
+      ...chatHistory,
+      { role: "user", content: message },
+    ];
+
+    const { message: answer, output_tokens } = await answerQuestion(
+      updatedChatHistory
+    );
 
     console.log(answer);
 

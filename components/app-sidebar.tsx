@@ -23,7 +23,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  User,
   User2,
   LogOutIcon,
   HomeIcon,
@@ -141,6 +140,8 @@ export function AppSidebar() {
   const [navItems, setNavItems] = useState(initNavItems);
   const [isCreating, setIsCreating] = useState(false);
 
+  console.log(session?.user);
+
   useEffect(() => {
     const fetchChats = async () => {
       try {
@@ -152,6 +153,7 @@ export function AppSidebar() {
               toast({
                 variant: "destructive",
                 description: data.error,
+                duration: 2000,
               });
             }
 
@@ -322,15 +324,26 @@ export function AppSidebar() {
                   size="lg"
                   className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                 >
-                  <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarImage
+                  {session?.user?.image ? (
+                    <Image
                       src={session?.user?.image as string}
                       alt={session?.user?.name as string}
+                      className="h-8 w-8 rounded-lg"
+                      width={40}
+                      height={40}
                     />
-                    <AvatarFallback className="rounded-lg">
-                      <User2 />
-                    </AvatarFallback>
-                  </Avatar>
+                  ) : (
+                    <Avatar className="h-8 w-8 rounded-lg">
+                      <AvatarImage
+                        src={session?.user?.image as string}
+                        alt={session?.user?.name as string}
+                      />
+                      <AvatarFallback className="rounded-lg">
+                        <User2 />
+                      </AvatarFallback>
+                    </Avatar>
+                  )}
+
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-semibold">
                       {session?.user?.name as string}

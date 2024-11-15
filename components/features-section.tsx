@@ -20,21 +20,20 @@ export default function FeaturesSection() {
       description: "Odpowiedz na kilka pytań i poznaj swój ślad węglowy.",
       skeleton: <FeatureOne />,
       className:
-        "col-span-1 lg:col-span-4 border-b lg:border-r dark:border-neutral-800 h-full",
+        "col-span-1 lg:col-span-4 border-b lg:border-r dark:border-border h-full",
     },
     {
       title: "Centrum ekologii",
       description: "Śledź swoje wyniki i postępy na dashboardzie.",
       skeleton: <FeatureTwo />,
-      className: "border-b col-span-1 lg:col-span-2 dark:border-neutral-800",
+      className: "border-b col-span-1 lg:col-span-2 dark:border-border",
     },
     {
       title: "Społeczność i rywalizacja ekologiczna",
       description:
         "Wykonuj zadania i rywalizuj z użytkownikami w rankingu punktów.",
       skeleton: <FeatureThree />,
-      className:
-        "col-span-1 lg:col-span-3 lg:border-r  dark:border-neutral-800",
+      className: "col-span-1 lg:col-span-3 lg:border-r  dark:border-border",
     },
     {
       title: "Asystent AI",
@@ -142,7 +141,7 @@ export const FeatureThree = () => {
           src={image}
           alt="feature image"
           className={`w-full hover:scale-105 duration-300 cursor-pointer ${
-            index != 0 ? "translate-x-6 !w-[400px] ml-auto" : ""
+            index != 0 ? "translate-x-6 hover:scale-125 !w-[400px] ml-auto" : ""
           }`}
         />
       ))}

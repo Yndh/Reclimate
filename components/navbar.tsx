@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import logo from "@/app/logo.svg";
 import logoLight from "@/app/logo-light.svg";
 import Image from "next/image";
+import { Button } from "./ui/button";
 
 interface NavItem {
   title: string;
@@ -14,7 +15,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   {
-    title: "O nas",
+    title: "Nasza misja",
     url: "#about",
   },
   {
@@ -22,12 +23,12 @@ const navItems: NavItem[] = [
     url: "#app",
   },
   {
-    title: "Społeczność",
-    url: "#",
+    title: "FAQ",
+    url: "#faq",
   },
   {
-    title: "FAQ",
-    url: "#",
+    title: "Dołącz teraz",
+    url: "#join",
   },
 ];
 
@@ -41,7 +42,7 @@ export const Navbar = () => {
   }, [resolvedTheme]);
 
   return (
-    <div className="flex items-center justify-between gap-4 px-10 py-6 w-full md:w-fit md:min-w-[50%] h-fit fixed bg-background border border-border rounded-full mt-4 z-50 text-xs md:text-sm text-muted-foreground">
+    <div className="flex items-center justify-between gap-4 px-4 md:px-10 py-6 w-11/12 md:w-fit md:min-w-[50%] h-fit fixed bg-background border border-border rounded-3xl md:rounded-full m-4 box-border z-50 text-xs md:text-sm text-muted-foreground">
       <div className="flex items-center gap-2">
         <Image
           src={theme == "light" ? logoLight : logo}
@@ -52,12 +53,17 @@ export const Navbar = () => {
         />
         <span className="text-xl font-semibold hidden md:block">Reclimate</span>
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 text-center">
         {navItems.map((item) => (
           <Link href={item.url}>{item.title}</Link>
         ))}
       </div>
-      <Link href={"/app"}>Zaloguj się</Link>
+      <Button
+        variant={"ghost"}
+        className="border border-border rounded-3xl bg-card  shadow backdrop-blur-[8px] duration-300 font-semibold text-xs md:text-sm"
+      >
+        <Link href={"/app"}>Zaloguj się</Link>
+      </Button>
     </div>
   );
 };

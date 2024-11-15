@@ -6,7 +6,6 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { ModeToggle } from "@/components/app-theme-toggle";
 import { Separator } from "@/components/ui/separator";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { Toaster } from "@/components/ui/toaster";
 import { SessionProvider } from "next-auth/react";
 
 export default function Layout({
@@ -30,7 +29,6 @@ export default function Layout({
           {children}
           <ChatPopup />
         </main>
-        <Toaster />
       </SidebarProvider>
     </SessionProvider>
   );

@@ -31,7 +31,14 @@ export default function SignInPage() {
             >
               <GitHubLogoIcon /> Login with Github
             </Button>
-            <Button variant="outline" className="w-full">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                signIn("google", { redirectTo: "/app" });
+              }}
+            >
+              <span className="font-semibold">G</span>
               Login with Google
             </Button>
           </div>

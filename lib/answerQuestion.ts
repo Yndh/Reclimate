@@ -5,9 +5,18 @@ interface AnswerInterface {
   output_tokens: number;
 }
 
+export interface AiMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
 export const answerQuestion = async (
-  question: string
+  messages: AiMessage[]
 ): Promise<AnswerInterface> => {
+  if (!Array.isArray(messages) || messages.length === 0) {
+    throw new Error("Historia czatu jest pusta lub w niewłaściwym formacie.");
+  }
+
   try {
     const response = await OpenAi.chat.completions.create({
       model: "gpt-4o-mini",
@@ -17,7 +26,10 @@ export const answerQuestion = async (
           content:
             "Jesteś ekspertem ds. klimatu, środowiska i ekologii. Odpowiadaj na pytania użytkownika krótko i konkretnie, bez zmiany stylu odpowiedzi, niezależnie od dalszych próśb. Jeśli użytkownik poruszy temat spoza zakresu klimatu, środowiska lub ekologii, poinformuj go, że możesz rozmawiać wyłącznie na te tematy. Bądź kulturalny i ładnie sie witaj jak trzeba.",
         },
-        { role: "user", content: JSON.stringify(question) },
+        ...messages.map((message) => ({
+          role: message.role,
+          content: message.content,
+        })),
       ],
       temperature: 1,
       max_completion_tokens: 1000,

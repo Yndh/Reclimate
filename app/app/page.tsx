@@ -36,6 +36,7 @@ import {
 import { CompleteTimer } from "@/components/completeTimer";
 import { Timer } from "@/components/timer";
 import { toast } from "@/hooks/use-toast";
+import { useSearchParams } from "next/navigation";
 
 const chartConfig = {
   footprint: {
@@ -54,6 +55,9 @@ export default function AppPage() {
     required: true,
     onUnauthenticated() {},
   });
+  const searchParams = useSearchParams();
+  const tips = searchParams.get("tips");
+  const showTips = tips === "true";
   const [userData, setUserData] = useState<User>();
   const [chartData, setChartData] = useState<ChartData[]>([]);
   const [completeDate, setCompleteDate] = useState<Date>();
@@ -225,7 +229,7 @@ export default function AppPage() {
             </CardHeader>
             <CardContent>
               {userData?.surveys != null ? (
-                <Dialog>
+                <Dialog defaultOpen={showTips}>
                   <DialogTrigger asChild>
                     <Button
                       variant={"outline"}
@@ -253,9 +257,7 @@ export default function AppPage() {
                         ].tips.map((tip, index) => (
                           <li
                             className={`text-sm ${
-                              tipsClick == 1
-                                ? "gradient-text duration-1000"
-                                : ""
+                              tipsClick < 2 ? "gradient-text duration-1000" : ""
                             }`}
                             key={`tip${index}`}
                           >
@@ -338,7 +340,7 @@ export default function AppPage() {
                 <CardDescription>Twoje zadania na ten tydzień</CardDescription>
               </div>
 
-              {!userData?.challenges ? (
+              {userData?.challenges ? (
                 <span className="text-sm text-muted-foreground">
                   {(() => {
                     const { end } = getWeekStartAndEnd();
