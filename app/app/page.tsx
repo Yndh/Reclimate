@@ -252,7 +252,10 @@ export default function AppPage() {
                     </DialogHeader>
                     <div className="w-full box-border">
                       <ol className="list-decimal w-full pl-4 space-y-2">
-                        {userData?.surveys[userData?.surveys.length - 1].tips &&
+                        {userData?.surveys &&
+                          userData?.surveys[userData?.surveys.length - 1] &&
+                          userData?.surveys[userData?.surveys.length - 1]
+                            .tips &&
                           userData?.surveys[
                             userData?.surveys.length - 1
                           ].tips.map((tip, index) => (
