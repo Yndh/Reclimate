@@ -36,7 +36,7 @@ import {
 import { CompleteTimer } from "@/components/completeTimer";
 import { Timer } from "@/components/timer";
 import { toast } from "@/hooks/use-toast";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const chartConfig = {
   footprint: {
@@ -56,6 +56,7 @@ export default function AppPage() {
     onUnauthenticated() {},
   });
   const searchParams = useSearchParams();
+  const router = useRouter();
   const tips = searchParams.get("tips");
   const showTips = tips === "true";
   const [userData, setUserData] = useState<User>();
@@ -80,6 +81,9 @@ export default function AppPage() {
             if (data.user) {
               setUserData(data.user);
 
+              if (!data.user.carbonFootprint) {
+                router.replace("/calculate");
+              }
               const footprintData = data.user.surveys
                 .filter((survey: Survey) => survey.carbonFootprint)
                 .map((survey: Survey) => ({

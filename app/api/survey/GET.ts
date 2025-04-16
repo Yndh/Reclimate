@@ -91,6 +91,7 @@ export async function mGET(req: NextRequest, res: NextApiResponse) {
         return new NextResponse(
           JSON.stringify({
             error: "Nie masz dostępu do tej ankiety",
+            redirect: "/new-user",
           }),
           {
             status: 405,

@@ -72,7 +72,6 @@ export default function NewUserPage() {
         const res = await fetch("/api/first-survey")
           .then((res) => res.json())
           .then((data) => {
-            console.log(data);
             if (data.error) {
               toast({
                 variant: "destructive",
@@ -90,7 +89,7 @@ export default function NewUserPage() {
             }
           });
       } catch (err) {
-        console.log(`Erro  fetching survey: ${err}`);
+        console.error(`Erro  fetching survey: ${err}`);
         toast({
           variant: "destructive",
           description: "Wystąpił błąd w trakcie pobierania ankiety",
@@ -107,8 +106,6 @@ export default function NewUserPage() {
   };
 
   const submitHandler = async () => {
-    console.log(answers);
-
     nextStep();
 
     try {
@@ -132,7 +129,7 @@ export default function NewUserPage() {
           }
         });
     } catch (err) {
-      console.log(`Error submiting survey: ${err}`);
+      console.error(`Error submiting survey: ${err}`);
       toast({
         variant: "destructive",
         description: "Wystąpił błąd w trakcie przesyłania ankiety",

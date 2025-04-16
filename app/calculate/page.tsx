@@ -70,6 +70,10 @@ export default function CalculatePage() {
           .then((res) => res.json())
           .then((data) => {
             if (data.error) {
+              if (data.redirect) {
+                router.replace(data.redirect);
+                return;
+              }
               toast({
                 variant: "destructive",
                 description: data.error,
@@ -84,7 +88,7 @@ export default function CalculatePage() {
             }
           });
       } catch (err) {
-        console.log(`Error getting survey: ${err}`);
+        console.error(`Error getting survey: ${err}`);
         toast({
           variant: "destructive",
           description: "Wystąpił błąd w trakcie pobiernia ankiety",
@@ -102,8 +106,6 @@ export default function CalculatePage() {
   };
 
   const submitHandler = async () => {
-    console.log(answers);
-
     nextStep();
 
     try {
@@ -128,7 +130,7 @@ export default function CalculatePage() {
           }
         });
     } catch (err) {
-      console.log(`Error submiting survey: ${err}`);
+      console.error(`Error submiting survey: ${err}`);
       toast({
         variant: "destructive",
         description: "Wystąpił błąd w trakcie przesyłanai ankiety",
