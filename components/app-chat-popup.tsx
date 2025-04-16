@@ -12,6 +12,7 @@ import { toast } from "@/hooks/use-toast";
 
 export const ChatPopup = () => {
   const [chat, setChat] = useState<MessageState[]>([]);
+  const [chatTitle, setChatTitle] = useState<string>("");
   const [id, setId] = useState<string>("");
   const [isFetching, setIsFetching] = useState(true);
   const [isVisible, setIsVisible] = useState(false);
@@ -57,6 +58,7 @@ export const ChatPopup = () => {
             setId(resChat.id);
             setChat(newMessages);
             setIsFetching(false);
+            setChatTitle(resChat.title as string);
           }
         });
     } catch (err) {
@@ -102,6 +104,7 @@ export const ChatPopup = () => {
           </div>
           <div className="h-[700px] w-[300px] md:w-[400px] mt-2">
             <AppChat
+              title={chatTitle as string}
               messages={chat}
               setMessages={setChat}
               id={id}

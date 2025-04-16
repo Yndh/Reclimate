@@ -117,11 +117,23 @@ export async function mPOST(req: Request, res: ResponseInterface) {
       { role: "user", content: message },
     ];
 
-    const { message: answer, output_tokens } = await answerQuestion(
-      updatedChatHistory
+    const {
+      message: answer,
+      output_tokens,
+      title,
+    } = await answerQuestion(
+      updatedChatHistory,
+      (chat.title && chat.title.trim().length > 0) as boolean
     );
 
-    console.log(answer);
+    if (title.length > 0) {
+      await prisma.chat.update({
+        where: { id: chatId },
+        data: {
+          title: title,
+        },
+      });
+    }
 
     const newMessage = await prisma.message.create({
       data: {
@@ -159,6 +171,7 @@ export async function mPOST(req: Request, res: ResponseInterface) {
     return new NextResponse(
       JSON.stringify({
         message: aiMessage,
+        ...(title.length > 0 && { title }),
       })
     );
   } catch (err) {

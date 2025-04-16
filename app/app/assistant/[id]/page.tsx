@@ -23,6 +23,7 @@ export default function AsisstantChatPage({ params }: ChatPageInterface) {
   });
   const router = useRouter();
   const [chat, setChat] = useState<MessageState[]>([]);
+  const [chatTitle, setChatTitle] = useState<string>("");
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const id = params.id;
 
@@ -51,6 +52,7 @@ export default function AsisstantChatPage({ params }: ChatPageInterface) {
               );
               setChat(newMessages);
               setIsFetching(false);
+              setChatTitle(resChat.title as string);
             }
           });
       } catch (err) {
@@ -69,6 +71,7 @@ export default function AsisstantChatPage({ params }: ChatPageInterface) {
     <div className="flex flex-col items-center w-full h-full p-8 pb-12 gap-6 box-border">
       <div className="w-full md:w-2/3 h-full">
         <AppChat
+          title={chatTitle ?? ""}
           messages={chat}
           id={id}
           isFetching={isFetching}

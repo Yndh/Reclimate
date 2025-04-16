@@ -1,10 +1,10 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-}
-
-generator client {
-  provider = "prisma-client-js"
 }
 
 model User {
@@ -13,16 +13,15 @@ model User {
   email           String      @unique
   emailVerified   DateTime?
   image           String?
-  accounts        Account[]
-  sessions        Session[]
-  surveys         Survey[]    @relation(name: "UserSurveys")
-  chats           Chat[]
-  challenges      Challenge[]
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
   points          Int         @default(0)
   carbonFootprint Float?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  accounts        Account[]
+  challenges      Challenge[]
+  chats           Chat[]
+  sessions        Session[]
+  surveys         Survey[]    @relation("UserSurveys")
 }
 
 model Account {
@@ -37,11 +36,9 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([provider, providerAccountId])
 }
@@ -50,10 +47,9 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 model VerificationToken {
@@ -67,85 +63,78 @@ model VerificationToken {
 model Survey {
   id              String     @id @default(cuid())
   userId          String
-  user            User       @relation(name: "UserSurveys", fields: [userId], references: [id], onDelete: Cascade)
-  responses       Response[]
-  tips            Tip[]
   carbonFootprint Float?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  responses       Response[]
+  user            User       @relation("UserSurveys", fields: [userId], references: [id], onDelete: Cascade)
+  tips            Tip[]
 }
 
 model Response {
-  id       String   @id @default(cuid())
-  surveyId String
-  survey   Survey   @relation(fields: [surveyId], references: [id], onDelete: Cascade)
-  question String
-  answers  Answer[] @relation(name: "ResponseAnswers")
-  answer   Answer?  @relation(name: "SelectedAnswer")
-
+  id        String   @id @default(cuid())
+  surveyId  String
+  question  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  answers   Answer[] @relation("ResponseAnswers")
+  answer    Answer?  @relation("SelectedAnswer")
+  survey    Survey   @relation(fields: [surveyId], references: [id], onDelete: Cascade)
 }
 
 model Answer {
-  id         String   @id @default(cuid())
-  responseId String
-  response   Response @relation(name: "ResponseAnswers", fields: [responseId], references: [id], onDelete: Cascade)
-  answer     String
-
+  id           String    @id @default(cuid())
+  responseId   String
+  answer       String
   selectedInId String?   @unique
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  response     Response  @relation("ResponseAnswers", fields: [responseId], references: [id], onDelete: Cascade)
   selectedIn   Response? @relation("SelectedAnswer", fields: [selectedInId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 model Tip {
-  id          String @id @default(cuid())
+  id          String   @id @default(cuid())
   surveyId    String
-  survey      Survey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
   description String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  survey      Survey   @relation(fields: [surveyId], references: [id], onDelete: Cascade)
 }
 
 model Challenge {
   id          String   @id @default(cuid())
   userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   title       String
   description String
   points      Int
   isCompleted Boolean  @default(false)
   startDate   DateTime
   endDate     DateTime
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Chat {
-  id       String    @id @default(cuid())
-  userId   String
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  messages Message[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String    @id @default(cuid())
+  userId    String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  title     String?
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages  Message[]
 }
 
 model Message {
-  id     String @id @default(cuid())
-  chatId String
-  chat   Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  text   String
-  tokens Int
-  sender Sender
-
+  id        String   @id @default(cuid())
+  text      String
+  chatId    String
+  tokens    Int
+  sender    Sender
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
 }
 
 enum Sender {

@@ -17,6 +17,7 @@ export interface MessageState {
 
 interface AppChatProps {
   messages: MessageState[];
+  title: string;
   setMessages: React.Dispatch<React.SetStateAction<MessageState[]>>;
   id: string;
   isFetching: boolean;
@@ -50,14 +51,22 @@ export const AppChat = ({
   id,
   isFetching,
   setMessages,
+  title,
 }: AppChatProps) => {
   const [chat, setChat] = useState<MessageState[]>(messages);
+  const [chatTitle, setChatTitle] = useState(title);
   const [message, setMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [recQuestions, setRecQuestions] = useState<string[]>([]);
   const [isNew, setIsNew] = useState(false);
   const [refreshTime, setRefreshTime] = useState<Date | null>(null);
   const chatRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (title.trim().length > 0) {
+      setChatTitle(title);
+    }
+  }, [title]);
 
   useEffect(() => {
     setChat(messages);
@@ -126,6 +135,9 @@ export const AppChat = ({
             ]);
             setIsNew(true);
           }
+          if (data.title && data.title.trim().length > 0)
+            setChatTitle(data.title);
+
           setIsLoading(false);
         });
     } catch (err) {
@@ -144,7 +156,14 @@ export const AppChat = ({
   };
 
   return (
-    <div className="flex flex-col items-center gap-10 w-full h-full">
+    <div className="relative flex flex-col items-center gap-10 w-full h-full">
+      <div className="w-full flex justify-center items-center text-lg font-medium">
+        {isFetching && !isLoading ? (
+          <Skeleton className="w-[120px] h-[14px] " />
+        ) : (
+          <h1 className="text-center">{chatTitle}</h1>
+        )}
+      </div>
       <div
         className="w-full flex-1 flex flex-col gap-8 overflow-y-scroll"
         ref={chatRef}

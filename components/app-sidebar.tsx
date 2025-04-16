@@ -70,6 +70,7 @@ interface NavItem {
 }
 
 interface CollapsibleItem {
+  id?: string;
   title: string;
   url: string;
 }
@@ -165,7 +166,8 @@ export function AppSidebar() {
                             ...item,
                             items: data.chats.map(
                               (chat: { id: string; title: string }) => ({
-                                title: chat.id,
+                                id: chat.id,
+                                title: chat.title,
                                 url: `/app/assistant/${chat.id}`,
                               })
                             ),
@@ -264,8 +266,12 @@ export function AppSidebar() {
                           <SidebarMenuSub>
                             {item.items?.map((subitem, index) => (
                               <SidebarMenuSubItem key={`subitem${index}`}>
-                                <Link href={subitem.url} className="w-full">
-                                  {subitem.title}
+                                <Link
+                                  href={subitem.url}
+                                  prefetch={false}
+                                  className="w-full"
+                                >
+                                  {subitem.title ?? subitem.id}
                                 </Link>
                               </SidebarMenuSubItem>
                             ))}

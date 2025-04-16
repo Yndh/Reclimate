@@ -78,6 +78,7 @@ export interface Chat {
   id: string;
   userId: string;
   user: User;
+  title?: string;
   messages: Message[];
 
   createdAt: Date;

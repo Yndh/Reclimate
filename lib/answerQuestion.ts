@@ -3,6 +3,7 @@ import { OpenAi } from "./openai";
 interface AnswerInterface {
   message: string;
   output_tokens: number;
+  title: string;
 }
 
 export interface AiMessage {
@@ -11,7 +12,8 @@ export interface AiMessage {
 }
 
 export const answerQuestion = async (
-  messages: AiMessage[]
+  messages: AiMessage[],
+  hasTitle = true
 ): Promise<AnswerInterface> => {
   if (!Array.isArray(messages) || messages.length === 0) {
     throw new Error("Historia czatu jest pusta lub w niewłaściwym formacie.");
@@ -45,8 +47,14 @@ export const answerQuestion = async (
                 type: "string",
                 description: "A text message.",
               },
+              ...(!hasTitle && {
+                title: {
+                  type: "string",
+                  description: "The title of the chat.",
+                },
+              }),
             },
-            required: ["message"],
+            required: ["message", ...(!hasTitle ? ["title"] : [])],
             additionalProperties: false,
           },
         },
@@ -57,10 +65,17 @@ export const answerQuestion = async (
       response.choices[0].message.content as string
     ).message;
     const output_tokens = response.usage?.completion_tokens;
+    let chatTitle = "";
+    if (!hasTitle) {
+      chatTitle = JSON.parse(
+        response.choices[0].message.content as string
+      ).title;
+    }
 
     return {
       message: message,
       output_tokens: output_tokens as number,
+      title: chatTitle.length > 0 ? chatTitle : "",
     };
   } catch (err) {
     console.error(`Error generating answer: ${err}`);
@@ -68,6 +83,7 @@ export const answerQuestion = async (
     return {
       message: "",
       output_tokens: 0,
+      title: "",
     };
   }
 };

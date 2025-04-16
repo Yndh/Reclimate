@@ -19,7 +19,12 @@ export async function mGET(req: NextRequest, res: NextApiResponse) {
     console.log(`Refresh error: ${err}`);
   }
   console.info("REFRESH DONE");
-  return new NextResponse(JSON.stringify(true), {
-    status: 200,
-  });
+  return new NextResponse(
+    JSON.stringify({
+      success: true,
+    }),
+    {
+      status: 200,
+    }
+  );
 }

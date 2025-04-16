@@ -252,18 +252,21 @@ export default function AppPage() {
                     </DialogHeader>
                     <div className="w-full box-border">
                       <ol className="list-decimal w-full pl-4 space-y-2">
-                        {userData?.surveys[
-                          userData?.surveys.length - 1
-                        ].tips.map((tip, index) => (
-                          <li
-                            className={`text-sm ${
-                              tipsClick < 2 ? "gradient-text duration-1000" : ""
-                            }`}
-                            key={`tip${index}`}
-                          >
-                            {tip.description}
-                          </li>
-                        ))}
+                        {userData?.surveys[userData?.surveys.length - 1].tips &&
+                          userData?.surveys[
+                            userData?.surveys.length - 1
+                          ].tips.map((tip, index) => (
+                            <li
+                              className={`text-sm ${
+                                tipsClick < 2
+                                  ? "gradient-text duration-1000"
+                                  : ""
+                              }`}
+                              key={`tip${index}`}
+                            >
+                              {tip.description}
+                            </li>
+                          ))}
                       </ol>
                     </div>
                   </DialogContent>
