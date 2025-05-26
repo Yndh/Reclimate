@@ -1,35 +1,42 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { AppRanking, Leaderboard } from "@/components/app-points-ranking";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function RankingPage() {
   const [users, setUsers] = useState<Leaderboard[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchRankingData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/ranking`);
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch ranking data");
+      }
+
+      const data = await res.json();
+      const { users: fetchedUsers }: { users: Leaderboard[] } = data;
+
+      fetchedUsers.sort((a, b) => b.points - a.points);
+      setUsers(fetchedUsers);
+    } catch (err) {
+      console.error(`Error fetching ranking data: ${err}`);
+      setError(
+        "Wystąpił błąd w trakcie wczytywania rankingu. Spróbuj ponownie później."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const fetchRankingData = async () => {
-      try {
-        const res = await fetch(`/api/ranking`);
-
-        if (!res.ok) {
-          throw new Error("Failed to fetch ranking data");
-        }
-
-        const data = await res.json();
-        const { users }: { users: Leaderboard[] } = data;
-        users.sort((a, b) => b.points - a.points);
-        setUsers(users);
-      } catch (err) {
-        console.error(`Error fetching ranking data: ${err}`);
-        setError(
-          "Wystąpił błąd w trakcie wczytywania rankingu. Spróbuj ponownie później."
-        );
-      }
-    };
-
     fetchRankingData();
-  }, []);
+  }, [fetchRankingData]);
 
   if (error) {
     return (
@@ -45,7 +52,15 @@ export default function RankingPage() {
         <p>Ranking</p>
       </div>
 
-      <AppRanking data={users} />
+      {loading ? (
+        <div className="space-y-4">
+          {[...Array(5)].map((_, index) => (
+            <Skeleton key={index} className="h-12 w-full rounded-md" />
+          ))}
+        </div>
+      ) : (
+        <AppRanking data={users} />
+      )}
     </div>
   );
 }

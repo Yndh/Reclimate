@@ -21,7 +21,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { Challenge, Survey, User } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Check, CheckCircle2 } from "lucide-react";
@@ -59,89 +59,89 @@ export default function AppPage() {
   const router = useRouter();
   const tips = searchParams.get("tips");
   const showTips = tips === "true";
-  const [userData, setUserData] = useState<User>();
+  const [userData, setUserData] = useState<User | null>(null);
   const [chartData, setChartData] = useState<ChartData[]>([]);
-  const [completeDate, setCompleteDate] = useState<Date>();
+  const [completeDate, setCompleteDate] = useState<Date | null>(null);
   const [tipsClick, setTipsClick] = useState(0);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        await fetch("/api/user")
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.error) {
-              toast({
-                variant: "destructive",
-                description: data.error,
-              });
-              return;
-            }
+  const fetchUser = useCallback(async () => {
+    try {
+      const res = await fetch("/api/user");
+      const data = await res.json();
 
-            if (data.user) {
-              setUserData(data.user);
-
-              if (!data.user.carbonFootprint) {
-                router.replace("/calculate");
-              }
-              const footprintData = data.user.surveys
-                .filter((survey: Survey) => survey.carbonFootprint)
-                .map((survey: Survey) => ({
-                  date: new Date(survey.createdAt),
-                  footprint: survey.carbonFootprint || 0,
-                }));
-              setChartData(footprintData);
-
-              const target = new Date(data.user.challenges[0].endDate);
-              setCompleteDate(
-                new Date(target.getTime() - 1 * 24 * 60 * 60 * 1000)
-              );
-            }
-          });
-      } catch (err) {
-        console.error(`User data fetch error: ${err}`);
+      if (data.error) {
         toast({
           variant: "destructive",
-          description: "Wystąpił błąd w trakcie pobierania danych użytkownika",
+          description: data.error,
+        });
+        return;
+      }
+
+      if (data.user) {
+        setUserData(data.user);
+
+        if (!data.user.carbonFootprint) {
+          router.replace("/calculate");
+        }
+
+        const footprintData = data.user.surveys
+          .filter((survey: Survey) => survey.carbonFootprint)
+          .map((survey: Survey) => ({
+            date: new Date(survey.createdAt),
+            footprint: survey.carbonFootprint || 0,
+          }))
+          .slice(-10);
+        setChartData(footprintData);
+
+        if (data.user.challenges && data.user.challenges.length > 0) {
+          const target = new Date(data.user.challenges[0].endDate);
+          setCompleteDate(new Date(target.getTime() - 1 * 24 * 60 * 60 * 1000));
+        }
+      }
+    } catch (err) {
+      console.error(`User data fetch error: ${err}`);
+      toast({
+        variant: "destructive",
+        description: "Wystąpił błąd w trakcie pobierania danych użytkownika",
+      });
+    }
+  }, [router]);
+
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
+
+  const updateChallenge = useCallback(async (id: string) => {
+    try {
+      const res = await fetch(`/api/challenges/${id}`, {
+        method: "POST",
+      });
+      const data = await res.json();
+
+      if (data.error) {
+        toast({
+          variant: "destructive",
+          description: data.error,
+        });
+        return;
+      }
+
+      if (data.challenge) {
+        setUserData((user) => {
+          if (user && user.id) {
+            return {
+              ...user,
+              points: user.points + data.challenge.points,
+              challenges: user.challenges?.map((chall) =>
+                chall.id === id
+                  ? { ...chall, ...(data.challenge as Challenge) }
+                  : chall
+              ),
+            };
+          }
+          return user;
         });
       }
-    };
-
-    fetchUser();
-  }, []);
-
-  const updateChallenge = async (id: string) => {
-    try {
-      await fetch(`/api/challenges/${id}`, {
-        method: "POST",
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.error) {
-            toast({
-              variant: "destructive",
-              description: data.error,
-            });
-            return;
-          }
-
-          if (data.challenge) {
-            setUserData((user) => {
-              if (user && user.id) {
-                return {
-                  ...user,
-                  points: user.points + data.challenge.points,
-                  challenges: user.challenges?.map((chall) =>
-                    chall.id === id
-                      ? { ...chall, ...(data.challenge as Challenge) }
-                      : chall
-                  ),
-                };
-              }
-              return user;
-            });
-          }
-        });
     } catch (err) {
       console.error(`Update error: ${err}`);
       toast({
@@ -149,28 +149,34 @@ export default function AppPage() {
         description: "Wystąpił błąd w tarkcie aktualizowania wyzwania",
       });
     }
-  };
+  }, []);
 
-  const getDates = (): [Date, Date] => {
-    const lowestDate = chartData.reduce(
+  const [lowestDate, highestDate] = useMemo(() => {
+    if (chartData.length === 0) {
+      const now = new Date();
+      return [now, now];
+    }
+    const lowest = chartData.reduce(
       (min, item) => (item.date < min ? item.date : min),
-      chartData[0]?.date || new Date()
+      chartData[0].date
     );
-    const highestDate = chartData.reduce(
+    const highest = chartData.reduce(
       (max, item) => (item.date > max ? item.date : max),
-      chartData[0]?.date || new Date()
+      chartData[0].date
     );
+    return [lowest, highest];
+  }, [chartData]);
 
-    return [lowestDate, highestDate];
-  };
-
-  const formatDate = (date: Date): string => {
+  const formatDate = useCallback((date: Date): string => {
     const day = date.getDate().toString().padStart(2, "0");
     const month = date.toLocaleString("pl-PL", { month: "long" });
     return `${day} ${month}`;
-  };
+  }, []);
 
-  const getWeekStartAndEnd = (): { start: Date; end: Date } => {
+  const formattedLowestDate = formatDate(lowestDate);
+  const formattedHighestDate = formatDate(highestDate);
+
+  const getWeekStartAndEnd = useCallback((): { start: Date; end: Date } => {
     const now = new Date();
     const dayOfWeek = now.getDay();
 
@@ -183,11 +189,21 @@ export default function AppPage() {
     end.setHours(23, 59, 59, 999);
 
     return { start, end };
-  };
+  }, []);
 
-  const [lowestDate, highestDate] = getDates();
-  const formattedLowestDate = formatDate(lowestDate);
-  const formattedHighestDate = formatDate(highestDate);
+  const memoizedChartData = useMemo(() => {
+    return chartData.map((item) => ({
+      ...item,
+      date: item.date.toLocaleDateString("pl-PL"),
+    }));
+  }, [chartData]);
+
+  const latestSurveyTips = useMemo(() => {
+    if (userData?.surveys && userData.surveys.length > 0) {
+      return userData.surveys[userData.surveys.length - 1]?.tips;
+    }
+    return null;
+  }, [userData?.surveys]);
 
   return (
     <div className="flex flex-col items-center w-full h-full p-8 pb-12 gap-6 box-border">
@@ -204,13 +220,14 @@ export default function AppPage() {
             <CardContent>
               {userData?.carbonFootprint != null ? (
                 <p className="text-2xl font-bold">
-                  {userData?.carbonFootprint}t CO₂
+                  {userData.carbonFootprint}t CO₂
                 </p>
               ) : (
                 <Skeleton className="w-[80px] h-[30px]" />
               )}
             </CardContent>
           </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Punkty</CardTitle>
@@ -218,12 +235,13 @@ export default function AppPage() {
             </CardHeader>
             <CardContent>
               {userData?.points != null ? (
-                <p className="text-2xl font-bold">{userData?.points}</p>
+                <p className="text-2xl font-bold">{userData.points}</p>
               ) : (
                 <Skeleton className="w-[80px] h-[30px]" />
               )}
             </CardContent>
           </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Porady</CardTitle>
@@ -256,13 +274,8 @@ export default function AppPage() {
                     </DialogHeader>
                     <div className="w-full box-border">
                       <ol className="list-decimal w-full pl-4 space-y-2">
-                        {userData?.surveys &&
-                          userData?.surveys[userData?.surveys.length - 1] &&
-                          userData?.surveys[userData?.surveys.length - 1]
-                            .tips &&
-                          userData?.surveys[
-                            userData?.surveys.length - 1
-                          ].tips.map((tip, index) => (
+                        {latestSurveyTips &&
+                          latestSurveyTips.map((tip, index) => (
                             <li
                               className={`text-sm ${
                                 tipsClick < 2
@@ -284,6 +297,7 @@ export default function AppPage() {
             </CardContent>
           </Card>
         </div>
+
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 w-full">
           <Card className="md:col-span-1 lg:col-span-2">
             <CardHeader>
@@ -293,56 +307,58 @@ export default function AppPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ChartContainer
-                config={chartConfig}
-                className="max-h-[400px] w-full"
-              >
-                <LineChart
-                  accessibilityLayer
-                  data={chartData.map((item) => ({
-                    ...item,
-                    date: item.date.toLocaleDateString("pl-PL"),
-                  }))}
-                  margin={{
-                    top: 20,
-                    left: 12,
-                    right: 12,
-                  }}
+              {chartData.length > 0 ? (
+                <ChartContainer
+                  config={chartConfig}
+                  className="max-h-[400px] w-full"
                 >
-                  <CartesianGrid vertical={false} />
-                  <XAxis
-                    dataKey="date"
-                    tickLine={false}
-                    axisLine={false}
-                    tickMargin={8}
-                  />
-                  <ChartTooltip
-                    cursor={false}
-                    content={<ChartTooltipContent indicator="line" />}
-                  />
-                  <Line
-                    dataKey="footprint"
-                    type="natural"
-                    stroke="var(--color-footprint)"
-                    strokeWidth={2}
-                    dot={{
-                      fill: "var(--color-footprint)",
-                    }}
-                    activeDot={{
-                      r: 6,
+                  <LineChart
+                    accessibilityLayer
+                    data={memoizedChartData}
+                    margin={{
+                      top: 20,
+                      left: 12,
+                      right: 12,
                     }}
                   >
-                    <LabelList
-                      position="top"
-                      offset={12}
-                      className="fill-foreground"
-                      fontSize={12}
+                    <CartesianGrid vertical={false} />
+                    <XAxis
+                      dataKey="date"
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={8}
                     />
-                  </Line>
-                </LineChart>
-              </ChartContainer>
+                    <ChartTooltip
+                      cursor={false}
+                      content={<ChartTooltipContent indicator="line" />}
+                    />
+                    <Line
+                      dataKey="footprint"
+                      type="natural"
+                      stroke="var(--color-footprint)"
+                      strokeWidth={2}
+                      dot={{
+                        fill: "var(--color-footprint)",
+                      }}
+                      activeDot={{
+                        r: 6,
+                      }}
+                    >
+                      <LabelList
+                        position="top"
+                        offset={12}
+                        className="fill-foreground"
+                        fontSize={12}
+                      />
+                    </Line>
+                  </LineChart>
+                </ChartContainer>
+              ) : (
+                <Skeleton className="h-[400px] w-full" />
+              )}
             </CardContent>
           </Card>
+
           <Card>
             <CardHeader className="flex flex-row justify-between">
               <div>
@@ -350,12 +366,9 @@ export default function AppPage() {
                 <CardDescription>Twoje zadania na ten tydzień</CardDescription>
               </div>
 
-              {userData?.challenges ? (
+              {userData?.challenges && userData.challenges.length > 0 ? (
                 <span className="text-sm text-muted-foreground">
-                  {(() => {
-                    const { end } = getWeekStartAndEnd();
-                    return <Timer targetDate={end} />;
-                  })()}
+                  <Timer targetDate={getWeekStartAndEnd().end} />
                 </span>
               ) : (
                 <Skeleton className="h-[14px] w-[30px]" />
@@ -363,8 +376,8 @@ export default function AppPage() {
             </CardHeader>
             <CardContent>
               {userData?.challenges && userData.challenges.length > 0 ? (
-                userData?.challenges.map((challenge, index) => (
-                  <Popover key={index}>
+                userData.challenges.map((challenge, index) => (
+                  <Popover key={challenge.id}>
                     <PopoverTrigger asChild>
                       <Button variant="ghost" className="h-fit mb-4">
                         <div className="flex align-top justify-start gap-4 h-fit w-full m-0">

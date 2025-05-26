@@ -97,7 +97,7 @@ export default function NewUserPage() {
       }
     };
     fetchSurveyData();
-  }, []);
+  }, [router]);
 
   const nextStep = () => {
     if (step < 3) {

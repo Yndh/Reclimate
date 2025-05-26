@@ -49,6 +49,8 @@ import {
   RefAttributes,
   useEffect,
   useState,
+  useCallback,
+  useMemo,
 } from "react";
 import { Collapsible, CollapsibleContent } from "./ui/collapsible";
 import { CollapsibleTrigger } from "@radix-ui/react-collapsible";
@@ -130,6 +132,8 @@ export function AppSidebar() {
   const router = useRouter();
   const { resolvedTheme } = useTheme();
   const [theme, setTheme] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
+  const [navItems, setNavItems] = useState<NavItems[]>(initNavItems);
 
   useEffect(() => {
     if (resolvedTheme) {
@@ -137,85 +141,82 @@ export function AppSidebar() {
     }
   }, [resolvedTheme]);
 
-  const [navItems, setNavItems] = useState(initNavItems);
-  const [isCreating, setIsCreating] = useState(false);
+  const fetchChats = useCallback(async () => {
+    try {
+      const res = await fetch("/api/chats");
+      const data = await res.json();
 
-  useEffect(() => {
-    const fetchChats = async () => {
-      try {
-        await fetch("/api/chats")
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.error) {
-              toast({
-                variant: "destructive",
-                description: data.error,
-                duration: 2000,
-              });
-            }
-
-            if (data.chats) {
-              setNavItems((prevNavItems) => {
-                return prevNavItems.map((section) => {
-                  if (section.label.toLocaleLowerCase() === "narzędzia") {
-                    return {
-                      ...section,
-                      items: section.items.map((item) => {
-                        if (item.title.toLocaleLowerCase() === "asystent") {
-                          return {
-                            ...item,
-                            items: data.chats.map(
-                              (chat: { id: string; title: string }) => ({
-                                id: chat.id,
-                                title: chat.title,
-                                url: `/app/assistant/${chat.id}`,
-                              })
-                            ),
-                          };
-                        }
-                        return item;
-                      }),
-                    };
-                  }
-                  return section;
-                });
-              });
-            }
-          });
-      } catch (err) {
-        console.error(`Error getting chats: ${err}`);
+      if (data.error) {
         toast({
           variant: "destructive",
-          description: "Wystąpił błąd w trakcie pobierania historii czatów",
+          description: data.error,
+          duration: 2000,
+        });
+        return;
+      }
+
+      if (data.chats) {
+        setNavItems((prevNavItems) => {
+          return prevNavItems.map((section) => {
+            if (section.label.toLocaleLowerCase() === "narzędzia") {
+              return {
+                ...section,
+                items: section.items.map((item) => {
+                  if (item.title.toLocaleLowerCase() === "asystent") {
+                    return {
+                      ...item,
+                      items: data.chats.map(
+                        (chat: { id: string; title: string }) => ({
+                          id: chat.id,
+                          title: chat.title,
+                          url: `/app/assistant/${chat.id}`,
+                        })
+                      ),
+                    };
+                  }
+                  return item;
+                }),
+              };
+            }
+            return section;
+          });
         });
       }
-    };
-
-    fetchChats();
+    } catch (err) {
+      console.error(`Error getting chats: ${err}`);
+      toast({
+        variant: "destructive",
+        description: "Wystąpił błąd w trakcie pobierania historii czatów",
+      });
+    }
   }, []);
 
-  const newChat = async () => {
+  useEffect(() => {
+    fetchChats();
+  }, [fetchChats]);
+
+  const newChat = useCallback(async () => {
     setIsCreating(true);
     try {
-      await fetch("/api/chats", {
+      const res = await fetch("/api/chats", {
         method: "POST",
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.error) {
-            toast({
-              variant: "destructive",
-              description: data.error,
-            });
-            setIsCreating(false);
-            return;
-          }
+      });
+      const data = await res.json();
 
-          if (data.chat) {
-            router.push(`/app/assistant/${data.chat.id}`);
-            setIsCreating(false);
-          }
+      if (data.error) {
+        toast({
+          variant: "destructive",
+          description: data.error,
         });
+        setIsCreating(false);
+        return;
+      }
+
+      if (data.chat) {
+        router.push(`/app/assistant/${data.chat.id}`);
+        await fetchChats();
+        setIsCreating(false);
+      }
     } catch (err) {
       console.error(`Error creating chat: ${err}`);
       toast({
@@ -224,7 +225,86 @@ export function AppSidebar() {
       });
       setIsCreating(false);
     }
-  };
+  }, [router, fetchChats]);
+
+  const renderedNavItems = useMemo(() => {
+    return navItems.map((item, index) => (
+      <SidebarGroup key={`group-${item.label}-${index}`}>
+        <SidebarGroupLabel>{item.label}</SidebarGroupLabel>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            {item.items.map((subItem) =>
+              (subItem.items && subItem.items.length > 0) ||
+              subItem.title.toLocaleLowerCase() === "asystent" ? (
+                <Collapsible
+                  key={`collapsible-${subItem.title}`}
+                  className="group/collapsible"
+                >
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton tooltip={subItem.title}>
+                        <subItem.icon size={16} />
+                        <span>{subItem.title}</span>
+                        <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        {subItem.items?.map((nestedItem) => (
+                          <SidebarMenuSubItem
+                            key={`subitem-${nestedItem.id || nestedItem.title}`}
+                          >
+                            <Link
+                              href={nestedItem.url}
+                              prefetch={false}
+                              className="w-full"
+                            >
+                              {nestedItem.title ?? nestedItem.id}
+                            </Link>
+                          </SidebarMenuSubItem>
+                        ))}
+                        {subItem.title.toLocaleLowerCase() === "asystent" && (
+                          <SidebarMenuSubItem key={`new-chat-button`}>
+                            <Button
+                              size={"sm"}
+                              variant={"outline"}
+                              className="mt-2 hover-gradient-border p-0 w-full"
+                              onClick={newChat}
+                              disabled={isCreating}
+                            >
+                              <span className="w-full h-full bg-bgStart rounded-md">
+                                <span className="flex items-center justify-center gap-2 w-full h-full bg-card backdrop-blur-[8px] text-foreground hover:text-white rounded-md px-3 py-2">
+                                  Utwórz czat
+                                  <SparklesIcon />
+                                </span>
+                              </span>
+                            </Button>
+                          </SidebarMenuSubItem>
+                        )}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+              ) : (
+                <SidebarMenuItem key={`menuitem-${subItem.title}`}>
+                  <SidebarMenuButton
+                    asChild
+                    tooltip={subItem.title}
+                    isActive={subItem.url === pathname.trim()}
+                  >
+                    <Link href={subItem.url}>
+                      <subItem.icon size={16} />
+                      <span>{subItem.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )
+            )}
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+    ));
+  }, [navItems, pathname, newChat, isCreating]);
 
   return (
     <Sidebar collapsible="icon">
@@ -233,7 +313,7 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton className="h-fit">
               <Image
-                src={theme == "light" ? logoLight : logo}
+                src={theme === "light" ? logoLight : logo}
                 alt={`logo`}
                 width={40}
                 height={40}
@@ -244,79 +324,7 @@ export function AppSidebar() {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>
-        {navItems.map((item, index) => (
-          <SidebarGroup key={`item${index}`}>
-            <SidebarGroupLabel>{item.label}</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {item.items.map((item) =>
-                  (item.items && item.items.length > 0) ||
-                  item.title.toLocaleLowerCase() == "asystent" ? (
-                    <Collapsible key={item.title} className="group/collapsible">
-                      <SidebarMenuItem>
-                        <CollapsibleTrigger asChild>
-                          <SidebarMenuButton tooltip={item.title}>
-                            <item.icon size={16} />
-                            <span>{item.title}</span>
-                            <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                          </SidebarMenuButton>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          <SidebarMenuSub>
-                            {item.items?.map((subitem, index) => (
-                              <SidebarMenuSubItem key={`subitem${index}`}>
-                                <Link
-                                  href={subitem.url}
-                                  prefetch={false}
-                                  className="w-full"
-                                >
-                                  {subitem.title ?? subitem.id}
-                                </Link>
-                              </SidebarMenuSubItem>
-                            ))}
-                            {item.title.toLocaleLowerCase() == "asystent" && (
-                              <SidebarMenuSubItem key={`subitemBtn`}>
-                                <Button
-                                  size={"sm"}
-                                  variant={"outline"}
-                                  className="mt-2 hover-gradient-border p-0 w-full"
-                                  onClick={newChat}
-                                  disabled={isCreating}
-                                >
-                                  <span className="w-full h-full bg-bgStart rounded-md">
-                                    <span className="flex items-center justify-center gap-2 w-full h-full bg-card backdrop-blur-[8px] text-foreground hover:text-white rounded-md px-3 py-2">
-                                      Utwórz czat
-                                      <SparklesIcon />
-                                    </span>
-                                  </span>
-                                </Button>
-                              </SidebarMenuSubItem>
-                            )}
-                          </SidebarMenuSub>
-                        </CollapsibleContent>
-                      </SidebarMenuItem>
-                    </Collapsible>
-                  ) : (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton
-                        asChild
-                        tooltip={item.title}
-                        isActive={item.url === pathname.trim()}
-                      >
-                        <Link href={item.url}>
-                          <item.icon size={16} />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  )
-                )}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        ))}
-      </SidebarContent>
+      <SidebarContent>{renderedNavItems}</SidebarContent>
       <SidebarFooter className="my-2">
         <SidebarMenu>
           <SidebarMenuItem>
@@ -328,8 +336,8 @@ export function AppSidebar() {
                 >
                   {session?.user?.image ? (
                     <Image
-                      src={session?.user?.image as string}
-                      alt={session?.user?.name as string}
+                      src={session.user.image as string}
+                      alt={session.user.name as string}
                       className="h-8 w-8 rounded-lg"
                       width={40}
                       height={40}

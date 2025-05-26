@@ -21,5 +21,4 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     signIn: "/signIn",
     newUser: "/new-user",
   },
-  debug: true,
 });

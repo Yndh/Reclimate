@@ -43,9 +43,21 @@ export type ChallengeData = {
 
 const names = {
   id: "Id",
+  durationDate: "Czas trwania",
   title: "Tytuł",
   points: "Punkty",
   isCompleted: "Ukończone",
+};
+
+const formatChallengeDate = (date: Date) => {
+  const formattedDate = date.toLocaleDateString("pl-PL", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+  const [day, month, year] = formattedDate.split(" ");
+  const capitalizedMonth = month.charAt(0).toLocaleUpperCase() + month.slice(1);
+  return { day, month: capitalizedMonth, year };
 };
 
 export const columns: ColumnDef<ChallengeData>[] = [
@@ -65,24 +77,17 @@ export const columns: ColumnDef<ChallengeData>[] = [
         <CaretSortIcon className="ml-2 h-4 w-4" />
       </Button>
     ),
+    accessorFn: (row) => {
+      return `${new Date(row.startDate).toISOString()}-${new Date(
+        row.endDate
+      ).toISOString()}`;
+    },
+    id: "durationDate",
     cell: ({ row }) => {
       const startDate = new Date(row.original.startDate);
       const endDate = new Date(row.original.endDate);
-
-      const formatDate = (date: Date) => {
-        const formattedDate = date.toLocaleDateString("pl-PL", {
-          day: "2-digit",
-          month: "long",
-          year: "numeric",
-        });
-        const [day, month, year] = formattedDate.split(" ");
-        const capitalizedMonth =
-          month.charAt(0).toLocaleUpperCase() + month.slice(1);
-        return { day, month: capitalizedMonth, year };
-      };
-
-      const start = formatDate(startDate);
-      const end = formatDate(endDate);
+      const start = formatChallengeDate(startDate);
+      const end = formatChallengeDate(endDate);
       const isSameMonthAndYear =
         start.month === end.month && start.year === end.year;
 
@@ -97,21 +102,21 @@ export const columns: ColumnDef<ChallengeData>[] = [
   },
   {
     accessorKey: "title",
-    header: () => <div className="text-right">Tytuł</div>,
+    header: () => <div>Tytuł</div>,
     cell: ({ row }) => (
-      <div className="text-right font-medium">{row.getValue("title")}</div>
+      <div className="font-medium">{row.getValue("title")}</div>
     ),
   },
   {
     accessorKey: "points",
-    header: () => <div className="text-right">Ilość punktów</div>,
+    header: () => <div>Ilość punktów</div>,
     cell: ({ row }) => (
-      <div className="text-right font-medium">{row.getValue("points")}</div>
+      <div className="font-medium">{row.getValue("points")}</div>
     ),
   },
   {
     accessorKey: "isCompleted",
-    header: () => <div className="text-right">Ukończone</div>,
+    header: () => <div>Ukończone</div>,
     cell: ({ row }) => (
       <div className="flex justify-center font-medium">
         {row.getValue("isCompleted") ? (
@@ -124,11 +129,11 @@ export const columns: ColumnDef<ChallengeData>[] = [
   },
 ];
 
-interface SurveyTableProps {
+interface AppChallengesTableProps {
   challenges: Challenge[];
 }
 
-export function AppChallengesTable({ challenges }: SurveyTableProps) {
+export function AppChallengesTable({ challenges }: AppChallengesTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
@@ -149,12 +154,12 @@ export function AppChallengesTable({ challenges }: SurveyTableProps) {
     data,
     columns,
     onSortingChange: React.useCallback(setSorting, []),
+    onColumnVisibilityChange: React.useCallback(setColumnVisibility, []),
+    onRowSelectionChange: React.useCallback(setRowSelection, []),
     getCoreRowModel: React.useMemo(() => getCoreRowModel(), []),
     getPaginationRowModel: React.useMemo(() => getPaginationRowModel(), []),
     getSortedRowModel: React.useMemo(() => getSortedRowModel(), []),
     getFilteredRowModel: React.useMemo(() => getFilteredRowModel(), []),
-    onColumnVisibilityChange: React.useCallback(setColumnVisibility, []),
-    onRowSelectionChange: React.useCallback(setRowSelection, []),
     state: {
       sorting,
       columnVisibility,
@@ -162,6 +167,7 @@ export function AppChallengesTable({ challenges }: SurveyTableProps) {
     },
   });
 
+  // Memoize pagination handlers
   const handlePreviousPage = React.useCallback(
     () => table.previousPage(),
     [table]

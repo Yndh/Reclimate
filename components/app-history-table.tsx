@@ -106,7 +106,7 @@ export function AppTable({ surveys }: SurveyTableProps) {
     return surveys.map((survey) => ({
       id: survey.id,
       createdAt: survey.createdAt,
-      questions: survey.responses.length ?? 0,
+      questions: survey.responses?.length ?? 0,
       carbonFootprint: survey.carbonFootprint ?? 0,
     }));
   }, [surveys]);
@@ -114,13 +114,15 @@ export function AppTable({ surveys }: SurveyTableProps) {
   const table = useReactTable({
     data,
     columns,
-    onSortingChange: React.useCallback(setSorting, []),
+    onSortingChange: React.useCallback(setSorting, [setSorting]),
+    onColumnVisibilityChange: React.useCallback(setColumnVisibility, [
+      setColumnVisibility,
+    ]),
+    onRowSelectionChange: React.useCallback(setRowSelection, [setRowSelection]),
     getCoreRowModel: React.useMemo(() => getCoreRowModel(), []),
     getPaginationRowModel: React.useMemo(() => getPaginationRowModel(), []),
     getSortedRowModel: React.useMemo(() => getSortedRowModel(), []),
     getFilteredRowModel: React.useMemo(() => getFilteredRowModel(), []),
-    onColumnVisibilityChange: React.useCallback(setColumnVisibility, []),
-    onRowSelectionChange: React.useCallback(setRowSelection, []),
     state: {
       sorting,
       columnVisibility,

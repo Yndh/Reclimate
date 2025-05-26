@@ -1,7 +1,7 @@
 "use client";
 
 import { Message, Sender } from "@/lib/types";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { Skeleton } from "./ui/skeleton";
 import { Input } from "./ui/input";
 import { SendHorizonal } from "lucide-react";
@@ -53,107 +53,177 @@ export const AppChat = ({
   setMessages,
   title,
 }: AppChatProps) => {
-  const [chat, setChat] = useState<MessageState[]>(messages);
+  const [currentChatMessages, setCurrentChatMessages] =
+    useState<MessageState[]>(messages);
   const [chatTitle, setChatTitle] = useState(title);
-  const [message, setMessage] = useState<string>("");
+  const [messageInput, setMessageInput] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [recQuestions, setRecQuestions] = useState<string[]>([]);
-  const [isNew, setIsNew] = useState(false);
+  const [isNewAssistantMessage, setIsNewAssistantMessage] = useState(false);
   const [refreshTime, setRefreshTime] = useState<Date | null>(null);
   const chatRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!title) return;
+
     if (title.trim().length > 0) {
       setChatTitle(title);
     }
   }, [title]);
 
   useEffect(() => {
-    setChat(messages);
+    setCurrentChatMessages(messages);
   }, [messages]);
 
   useEffect(() => {
     setRecQuestions(questions.sort(() => 0.5 - Math.random()).slice(0, 3));
   }, []);
-
   useEffect(() => {
-    if (chat.length != 0 && chat != messages) {
-      setMessages(chat);
+    if (currentChatMessages.length > 0 && currentChatMessages !== messages) {
+      setMessages(currentChatMessages);
     }
 
     if (chatRef.current) {
-      chatRef.current.scrollTo({ top: chatRef.current.scrollHeight });
+      chatRef.current.scrollTo({
+        top: chatRef.current.scrollHeight,
+        behavior: "smooth",
+      });
     }
-  }, [chat]);
+  }, [currentChatMessages, messages, setMessages]);
 
-  const sendMessage = async () => {
-    if (message.trim().length == 0) {
+  const sendMessage = useCallback(async () => {
+    if (!messageInput) return;
+
+    if (messageInput.trim().length === 0) {
       return;
     }
 
-    if (message.trim().length > 400) {
+    if (messageInput.trim().length > 400) {
+      toast({
+        variant: "destructive",
+        description: "Wiadomość jest za długa (maksymalnie 400 znaków).",
+      });
       return;
     }
 
-    setMessage("");
-    setChat((prevMessages) => [
+    const userMessage = messageInput.trim();
+    setMessageInput("");
+
+    setCurrentChatMessages((prevMessages) => [
       ...prevMessages,
       {
-        text: message.trim(),
+        text: userMessage,
         sender: Sender.USER,
       },
     ]);
     setIsLoading(true);
 
     try {
-      await fetch(`/api/chats/${id}`, {
+      const res = await fetch(`/api/chats/${id}`, {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
-          message: message,
+          message: userMessage,
         }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.error) {
-            toast({
-              variant: "destructive",
-              description: data.error,
-            });
-            if (data.refreshTime) {
-              setRefreshTime(new Date(data.refreshTime));
-            }
-          }
+      });
+      const data = await res.json();
 
-          if (data.message) {
-            const resMessage: Message = data.message;
-            setChat((prevMessages) => [
-              ...prevMessages,
-              {
-                text: resMessage.text,
-                sender: resMessage.sender,
-              },
-            ]);
-            setIsNew(true);
-          }
-          if (data.title && data.title.trim().length > 0)
-            setChatTitle(data.title);
-
-          setIsLoading(false);
+      if (data.error) {
+        toast({
+          variant: "destructive",
+          description: data.error,
         });
+        if (data.refreshTime) {
+          setRefreshTime(new Date(data.refreshTime));
+        }
+      }
+
+      if (data.message) {
+        const resMessage: Message = data.message;
+        setCurrentChatMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            text: resMessage.text,
+            sender: resMessage.sender,
+          },
+        ]);
+        setIsNewAssistantMessage(true);
+      }
+      if (data.title && data.title.trim().length > 0) {
+        setChatTitle(data.title);
+      }
     } catch (err) {
       console.error(`Error sending message: ${err}`);
       toast({
         variant: "destructive",
         description: "Wystąpił błąd w trakcie wysyłania wiadomości",
       });
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, [id, messageInput]);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      sendMessage();
-    }
-  };
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter" && !isLoading && refreshTime === null) {
+        sendMessage();
+      }
+    },
+    [sendMessage, isLoading, refreshTime]
+  );
+
+  const renderedChatMessages = useMemo(() => {
+    return currentChatMessages.map((message, index) => (
+      <div
+        className={`flex items-start justify-${
+          message.sender === Sender.USER ? "end" : "start"
+        } gap-4 w-full`}
+        key={`message-${index}`}
+      >
+        {message.sender === Sender.ASSISTANT && (
+          <span className="w-[40px] h-[40px] aspect-square rounded-full flex items-center justify-center bg-muted">
+            🤖
+          </span>
+        )}
+        <div
+          className={`h-fit space-y-2 min-w-[100px] max-w-[400px] mt-1 rounded-xl p-2 ${
+            message.sender === Sender.USER
+              ? "bg-popover border backdrop-blur-[8px] shadow"
+              : ""
+          }`}
+        >
+          <div
+            className={`text-wrap ${
+              message.sender === Sender.ASSISTANT &&
+              index === currentChatMessages.length - 1 &&
+              isNewAssistantMessage
+                ? "gradient-text"
+                : ""
+            }`}
+            onAnimationEnd={() => setIsNewAssistantMessage(false)}
+          >
+            <ReactMarkdown>{message.text}</ReactMarkdown>
+          </div>
+        </div>
+      </div>
+    ));
+  }, [currentChatMessages, isNewAssistantMessage]);
+
+  const renderedRecQuestions = useMemo(() => {
+    return recQuestions.map((question, index) => (
+      <div
+        className="flex items-center rounded-xl border bg-card backdrop-blur-[8px] shadow text-xs text-muted-foreground p-2 hover:bg-accent duration-300 cursor-pointer"
+        onClick={() => {
+          setMessageInput(question);
+        }}
+        key={`recQuestion-${index}`}
+      >
+        <span>{question}</span>
+      </div>
+    ));
+  }, [recQuestions]);
 
   return (
     <div className="relative flex flex-col items-center gap-10 w-full h-full">
@@ -190,43 +260,8 @@ export const AppChat = ({
           </>
         ) : (
           <>
-            {chat.length > 0 ? (
-              chat.map((message, index) => (
-                <div
-                  className={`flex items-start justify-${
-                    message.sender == Sender.USER ? "end" : "start"
-                  } gap-4 w-full`}
-                  key={`message${index}`}
-                >
-                  {message.sender == Sender.ASSISTANT && (
-                    <span className="w-[40px] h-[40px] aspect-square rounded-full flex items-center justify-center bg-muted">
-                      🤖
-                    </span>
-                  )}
-                  <div
-                    className={`h-fit space-y-2 min-w-[100px] max-w-[400px] mt-1 rounded-xl p-2 ${
-                      message.sender == Sender.USER &&
-                      "bg-popover border backdrop-blur-[8px] shadow"
-                    }`}
-                  >
-                    <div
-                      className={`text-wrap ${
-                        message.sender == Sender.ASSISTANT &&
-                        index == chat.length - 1 &&
-                        isNew
-                          ? "gradient-text"
-                          : ""
-                      }`}
-                    >
-                      {message.text.split("\\n").map((line, index) => (
-                        <React.Fragment key={index}>
-                          <ReactMarkdown>{line}</ReactMarkdown>
-                        </React.Fragment>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ))
+            {currentChatMessages.length > 0 ? (
+              renderedChatMessages
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center gap-2">
                 <h1 className="text-4xl text-center font-bold">
@@ -235,18 +270,8 @@ export const AppChat = ({
                 <p className="text-sm text-center text-muted-foreground">
                   Zadaj pytanie twojemu ekologicznemu asystentowi!
                 </p>
-                <div className="flex flex-row gap-2 justify-center mt-4">
-                  {recQuestions.map((question, index) => (
-                    <div
-                      className="flex items-center  rounded-xl border bg-card backdrop-blur-[8px] shadow text-xs text-muted-foreground p-2 hover:bg-accent duration-300 cursor-pointer"
-                      onClick={() => {
-                        setMessage(question);
-                      }}
-                      key={`recQuestion${index}`}
-                    >
-                      <span>{question}</span>
-                    </div>
-                  ))}
+                <div className="flex flex-row gap-2 justify-center mt-4 flex-wrap">
+                  {renderedRecQuestions}
                 </div>
               </div>
             )}
@@ -268,27 +293,31 @@ export const AppChat = ({
 
       <div className="w-full flex flex-row items-center mb-4 gap-2 relative">
         {refreshTime && (
-          <div className="w-full h-full absolute top-0 left 0 flex items-center justify-center backdrop-blur-[2px] z-40 text-muted-foreground">
+          <div className="w-full h-full absolute top-0 left-0 flex items-center justify-center backdrop-blur-[2px] z-40 text-muted-foreground">
             <Timer targetDate={refreshTime} setData={setRefreshTime} />
           </div>
         )}
         <Input
-          value={message}
-          onChange={(e) => setMessage(e.target.value as string)}
+          value={messageInput}
+          onChange={(e) => setMessageInput(e.target.value)}
           className={`p-6 rounded-full pr-20 ${
-            message.trim().length > 400 && "border-red-700"
+            messageInput.trim().length > 400 ? "border-red-700" : ""
           }`}
           onKeyDown={handleKeyDown}
           placeholder="Wpisz wiadomość..."
-          disabled={isFetching || refreshTime != null}
+          disabled={isFetching || isLoading || refreshTime !== null}
         />
         <span className="text-sm text-muted-foreground outline-none absolute right-20">
-          {message.trim().length}/400
+          {messageInput.trim().length}/400
         </span>
         <button
           className="aspect-square rounded-full w-[50px] h-[50px] p-2 flex items-center justify-center hover:bg-accent duration-300"
           onClick={sendMessage}
-          disabled={refreshTime != null}
+          disabled={
+            isLoading ||
+            refreshTime !== null ||
+            messageInput.trim().length === 0
+          }
         >
           <SendHorizonal size={24} />
         </button>
