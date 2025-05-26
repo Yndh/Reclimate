@@ -7,7 +7,7 @@ import { Survey } from "@/lib/types";
 import { ChevronRight, Sparkles } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import {
   ChartConfig,
   ChartContainer,
@@ -35,9 +35,6 @@ export interface SurveyAnswer {
 }
 
 const chartConfig = {
-  visitors: {
-    label: "Visitors",
-  },
   poland: {
     label: "Polska",
     color: "hsl(var(--chart-1))",
@@ -48,7 +45,7 @@ const chartConfig = {
   },
   global: {
     label: "Świat",
-    color: "hsl(var(--chart-4))",
+    color: "hsl(var(--chart-3))",
   },
 } satisfies ChartConfig;
 
@@ -63,102 +60,129 @@ export default function NewUserPage() {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<SurveyAnswer[]>([]);
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [surveyId, setSurveyId] = useState<string>();
-  const [surveyResponse, setSurveyResponse] = useState<Survey>();
+  const [surveyId, setSurveyId] = useState<string | null>(null);
+  const [surveyResponse, setSurveyResponse] = useState<Survey | null>(null);
+  const [isQuestionsLoading, setIsQuestionsLoading] = useState(true);
+  const [isSubmittingSurvey, setIsSubmittingSurvey] = useState(false);
 
-  useEffect(() => {
-    const fetchSurveyData = async () => {
-      try {
-        const res = await fetch("/api/first-survey")
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.error) {
-              toast({
-                variant: "destructive",
-                description: data.error,
-              });
-              router.replace("/app");
-              return;
-            }
+  const fetchSurveyData = useCallback(async () => {
+    setIsQuestionsLoading(true);
+    try {
+      const res = await fetch("/api/first-survey");
+      const data = await res.json();
 
-            if (data.id) {
-              setSurveyId(data.id);
-            }
-            if (data.questions) {
-              setQuestions(data.questions);
-            }
-          });
-      } catch (err) {
-        console.error(`Erro  fetching survey: ${err}`);
+      if (data.error) {
+        if (data.redirect) {
+          router.replace(data.redirect);
+          return;
+        }
         toast({
           variant: "destructive",
-          description: "Wystąpił błąd w trakcie pobierania ankiety",
+          description: data.error,
         });
+        router.replace("/app");
+        return;
       }
-    };
-    fetchSurveyData();
+
+      if (data.id) {
+        setSurveyId(data.id);
+      }
+      if (data.questions) {
+        setQuestions(data.questions);
+      }
+    } catch (err) {
+      console.error(`Error fetching survey: ${err}`);
+      toast({
+        variant: "destructive",
+        description: "Wystąpił błąd w trakcie pobierania ankiety",
+      });
+      router.replace("/app");
+    } finally {
+      setIsQuestionsLoading(false);
+    }
   }, [router]);
 
-  const nextStep = () => {
-    if (step < 3) {
-      setStep(step + 1);
-    }
-  };
+  useEffect(() => {
+    fetchSurveyData();
+  }, [fetchSurveyData]);
 
-  const submitHandler = async () => {
+  const nextStep = useCallback(() => {
+    if (step < 3) {
+      setStep((prevStep) => prevStep + 1);
+    }
+  }, [step]);
+
+  const submitHandler = useCallback(async () => {
+    setIsSubmittingSurvey(true);
     nextStep();
 
     try {
-      await fetch(`/api/survey/${surveyId}`, {
+      const res = await fetch(`/api/survey/${surveyId}`, {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           answers,
         }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.error) {
-            toast({
-              variant: "destructive",
-              description: data.error,
-            });
-            return;
-          }
-          if (data.survey) {
-            setSurveyResponse(data.survey);
-          }
+      });
+      const data = await res.json();
+
+      if (data.error) {
+        toast({
+          variant: "destructive",
+          description: data.error,
         });
+        return;
+      }
+
+      if (data.survey) {
+        setSurveyResponse(data.survey);
+      }
     } catch (err) {
-      console.error(`Error submiting survey: ${err}`);
+      console.error(`Error submitting survey: ${err}`);
       toast({
         variant: "destructive",
         description: "Wystąpił błąd w trakcie przesyłania ankiety",
       });
+    } finally {
+      setIsSubmittingSurvey(false);
     }
-  };
+  }, [answers, nextStep, surveyId]);
 
-  const chartData = [
-    { target: "poland", footprint: 8, fill: "var(--color-poland)" },
-    {
-      target: "yours",
-      footprint: surveyResponse?.carbonFootprint,
-      fill: "var(--color-yours)",
-    },
-    { target: "global", footprint: 4.5, fill: "var(--color-global)" },
-  ];
+  const chartData = useMemo(
+    () => [
+      { target: "poland", footprint: 8, fill: "var(--color-poland)" },
+      {
+        target: "yours",
+        footprint: surveyResponse?.carbonFootprint ?? 0,
+        fill: "var(--color-yours)",
+      },
+      { target: "global", footprint: 4.5, fill: "var(--color-global)" },
+    ],
+    [surveyResponse?.carbonFootprint]
+  );
 
   return (
     <div className="flex items-center justify-center w-full h-full">
-      {step == 0 && (
+      {step === 0 && (
         <Card className="w-full h-fit md:h-1/2 md:w-1/2">
           <CardHeader>
             <CardTitle>Wprowadzenie</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col justify-center items-center text-center gap-2 h-2/3">
-            {questions.length > 0 ? (
+            {isQuestionsLoading ? (
+              <>
+                <Skeleton className="w-[200px] h-[20px] mb-2 rounded-full" />
+                <Skeleton className="w-full h-[20px] rounded-full" />
+                <Skeleton className="w-full h-[20px] rounded-full" />
+                <Skeleton className="w-full h-[20px] rounded-full" />
+                <Skeleton className="w-[200px] h-[20px] mt-4 rounded-full" />
+              </>
+            ) : (
               <>
                 <h2 className="text-xl font-bold">
-                  Witaj, {session?.user?.name}!
+                  Witaj, {session?.user?.name || "Użytkowniku"}!{" "}
                 </h2>
                 <p className="text-base text-muted-foreground">
                   &quot;Reclimate&quot; to innowacyjna aplikacja, która pomaga
@@ -176,23 +200,14 @@ export default function NewUserPage() {
                 </p>
 
                 <Button className="mt-4" onClick={nextStep}>
-                  Wypełnij ankietę <ChevronRight />
+                  Wypełnij ankietę <ChevronRight className="ml-2 h-4 w-4" />
                 </Button>
-              </>
-            ) : (
-              <>
-                <Skeleton className="w-[200px] h-[20px] mb-2 rounded-full" />
-                <Skeleton className="w-full h-[20px] rounded-full" />
-                <Skeleton className="w-full h-[20px] rounded-full" />
-                <Skeleton className="w-full mt-4 h-[20px] rounded-full" />
-                <Skeleton className="w-full h-[20px] rounded-full" />
-                <Skeleton className="w-[200px] h-[20px] mt-4 rounded-full" />
               </>
             )}
           </CardContent>
         </Card>
       )}
-      {step == 1 && (
+      {step === 1 && (
         <Card className="w-full h-fit md:h-1/2 md:w-1/2">
           <CardHeader>
             <CardTitle>Wprowadzenie</CardTitle>
@@ -229,13 +244,13 @@ export default function NewUserPage() {
             !surveyResponse && "backdrop-blur-[0px] h-1/2 !backdrop-filter-none"
           }`}
         >
-          <div className={`gradient ${surveyResponse && "finish"}`}></div>
+          <div className={`gradient -z-40 ${surveyResponse && "finish"}`}></div>
           <CardContent
             className={`flex flex-col justify-center items-center text-center gap-2 h-full ${
               !surveyResponse ? "animate-pulse" : "animate-in"
             }`}
           >
-            {!surveyResponse ? (
+            {isSubmittingSurvey || !surveyResponse ? (
               <>
                 <Sparkles className="" size={32} />
                 <p className="text-base text-muted-foreground ">
@@ -274,11 +289,11 @@ export default function NewUserPage() {
                       }
                     />
                     <XAxis dataKey="footprint" type="number" hide />
+                    <Bar dataKey="footprint" layout="vertical" radius={5} />
                     <ChartTooltip
                       cursor={false}
                       content={<ChartTooltipContent hideLabel />}
                     />
-                    <Bar dataKey="footprint" layout="vertical" radius={5} />
                   </BarChart>
                 </ChartContainer>
                 <Button

@@ -7,7 +7,7 @@ import { Survey } from "@/lib/types";
 import { Sparkles } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import {
   ChartConfig,
   ChartContainer,
@@ -60,103 +60,124 @@ export default function CalculatePage() {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<SurveyAnswer[]>([]);
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [surveyId, setSurveyId] = useState<string>();
-  const [surveyResponse, setSurveyResponse] = useState<Survey>();
+  const [surveyId, setSurveyId] = useState<string | null>(null);
+  const [surveyResponse, setSurveyResponse] = useState<Survey | null>(null);
+  const [isSurveyLoading, setIsSurveyLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchSurveyData = async () => {
-      try {
-        const res = await fetch("/api/survey")
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.error) {
-              if (data.redirect) {
-                router.replace(data.redirect);
-                return;
-              }
-              toast({
-                variant: "destructive",
-                description: data.error,
-              });
-              router.replace("/app");
-            }
-            if (data.id) {
-              setSurveyId(data.id);
-            }
-            if (data.questions) {
-              setQuestions(data.questions);
-            }
-          });
-      } catch (err) {
-        console.error(`Error getting survey: ${err}`);
+  const fetchSurveyData = useCallback(async () => {
+    setIsSurveyLoading(true);
+    try {
+      const res = await fetch("/api/survey");
+      const data = await res.json();
+
+      if (data.error) {
+        if (data.redirect) {
+          router.replace(data.redirect);
+          return;
+        }
         toast({
           variant: "destructive",
-          description: "Wystąpił błąd w trakcie pobiernia ankiety",
+          description: data.error,
         });
         router.replace("/app");
+        return;
       }
-    };
-    fetchSurveyData();
+      if (data.id) {
+        setSurveyId(data.id);
+      }
+      if (data.questions) {
+        setQuestions(data.questions);
+      }
+    } catch (err) {
+      console.error(`Error getting survey: ${err}`);
+      toast({
+        variant: "destructive",
+        description: "Wystąpił błąd w trakcie pobierania ankiety",
+      });
+      router.replace("/app");
+    } finally {
+      setIsSurveyLoading(false);
+    }
   }, [router]);
 
-  const nextStep = () => {
-    if (step < 2) {
-      setStep(step + 1);
-    }
-  };
+  useEffect(() => {
+    fetchSurveyData();
+  }, [fetchSurveyData]);
 
-  const submitHandler = async () => {
+  const nextStep = useCallback(() => {
+    if (step < 2) {
+      setStep((prevStep) => prevStep + 1);
+    }
+  }, [step]);
+
+  const submitHandler = useCallback(async () => {
     nextStep();
 
     try {
-      await fetch(`/api/survey/${surveyId}`, {
+      const res = await fetch(`/api/survey/${surveyId}`, {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           answers,
         }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.error) {
-            toast({
-              variant: "destructive",
-              description: data.error,
-            });
-            return;
-          }
+      });
+      const data = await res.json();
 
-          if (data.survey) {
-            setSurveyResponse(data.survey);
-          }
+      if (data.error) {
+        toast({
+          variant: "destructive",
+          description: data.error,
         });
+        return;
+      }
+
+      if (data.survey) {
+        setSurveyResponse(data.survey);
+      }
     } catch (err) {
-      console.error(`Error submiting survey: ${err}`);
+      console.error(`Error submitting survey: ${err}`);
       toast({
         variant: "destructive",
-        description: "Wystąpił błąd w trakcie przesyłanai ankiety",
+        description: "Wystąpił błąd w trakcie przesyłania ankiety",
       });
     }
-  };
+  }, [answers, nextStep, surveyId]);
 
-  const chartData = [
-    { target: "poland", footprint: 8, fill: "var(--color-poland)" },
-    {
-      target: "yours",
-      footprint: surveyResponse?.carbonFootprint,
-      fill: "var(--color-yours)",
-    },
-    { target: "global", footprint: 4.5, fill: "var(--color-global)" },
-  ];
+  const chartData = useMemo(
+    () => [
+      { target: "poland", footprint: 8, fill: "var(--color-poland)" },
+      {
+        target: "yours",
+        footprint: surveyResponse?.carbonFootprint ?? 0,
+        fill: "var(--color-yours)",
+      },
+      { target: "global", footprint: 4.5, fill: "var(--color-global)" },
+    ],
+    [surveyResponse?.carbonFootprint]
+  );
 
   return (
     <div className="flex items-center justify-center w-full h-full p-10">
-      {step == 0 && (
+      {step === 0 && (
         <Card className="w-full h-fit md:h-1/2 md:w-1/2">
           <CardHeader>
             <CardTitle>Wprowadzenie</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col justify-center items-center text-center gap-2 h-2/3">
-            {questions.length > 0 ? (
+            {isSurveyLoading ? (
+              <>
+                <Skeleton className="w-[200px] h-[20px] mb-2 rounded-full" />
+                <Skeleton className="w-full h-[20px] rounded-full" />
+                <Skeleton className="w-full h-[20px] rounded-full" />
+                <Skeleton className="w-full h-[20px] rounded-full" />
+                <div className="w-full mx-5 flex justify-end">
+                  <Skeleton className="w-[100px] h-[20px] rounded-full" />
+                </div>
+                <Skeleton className="w-[200px] h-[20px] mt-4 rounded-full" />
+              </>
+            ) : (
               <>
                 <h2 className="text-xl font-bold">Na czym to polega?</h2>
                 <p className="text-base text-muted-foreground">
@@ -173,17 +194,6 @@ export default function CalculatePage() {
                   Rozpocznij
                 </Button>
               </>
-            ) : (
-              <>
-                <Skeleton className="w-[200px] h-[20px] mb-2 rounded-full" />
-                <Skeleton className="w-full h-[20px] rounded-full" />
-                <Skeleton className="w-full h-[20px] rounded-full" />
-                <Skeleton className="w-full h-[20px] rounded-full" />
-                <div className="w-full mx-5 flex justify-end">
-                  <Skeleton className="w-[100px] h-[20px] rounded-full" />
-                </div>
-                <Skeleton className="w-[200px] h-[20px] mt-4 rounded-full" />
-              </>
             )}
           </CardContent>
         </Card>
@@ -196,7 +206,7 @@ export default function CalculatePage() {
           onFinish={submitHandler}
         />
       )}
-      {step == 2 && (
+      {step === 2 && (
         <Card
           className={`gradient-border-box w-full h-fit md:h-1/2 md:w-1/2 bg-background py-4 ${
             !surveyResponse && "backdrop-blur-[0px] h-1/2 !backdrop-filter-none"
