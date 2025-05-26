@@ -133,7 +133,7 @@ export default function CarbonPage() {
   }, [userData?.challenges, memoizedGetWeekStartAndEnd]);
 
   return (
-    <div className="w-full h-full p-8 overflow-y-scroll">
+    <div className="w-full h-screen p-8 overflow-y-scroll box-border">
       <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-4 ">
         <Card className="order-2 md:order-1 lg:col-span-2">
           <CardHeader>

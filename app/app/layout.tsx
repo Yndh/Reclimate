@@ -20,7 +20,7 @@ export default function Layout({
       <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
         <SidebarProvider>
           <AppSidebar />
-          <main className="w-full h-screen pb-5 box-border relative overflow-y-hidden">
+          <main className="flex flex-col w-full h-screen pb-5 box-border relative overflow-y-hidden">
             <div className="flex justify-between items-center p-2">
               <div className="flex items-center gap-2 relative">
                 <SidebarTrigger />
