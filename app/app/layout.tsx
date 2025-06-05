@@ -2,6 +2,7 @@
 
 import { AppBreadcrumb } from "@/components/app-breadcrumb";
 import { ChatPopup } from "@/components/app-chat-popup";
+import { PwaPrompt } from "@/components/app-pwa-prompt";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ModeToggle } from "@/components/app-theme-toggle";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -34,6 +35,7 @@ export default function Layout({
             <Suspense>{children}</Suspense>
             <ChatPopup />
           </main>
+          <PwaPrompt />
         </SidebarProvider>
       </ThemeProvider>
     </SessionProvider>

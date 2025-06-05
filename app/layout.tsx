@@ -3,7 +3,6 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { AppBlob } from "@/components/app-blob";
 import { Toaster } from "@/components/ui/toaster";
-import { PwaPrompt } from "@/components/app-pwa-prompt";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -52,7 +51,6 @@ export default function RootLayout({
         <AppBlob x={-300} y={0} bottom />
         <AppBlob side="right" x={10} y={10} bottom />
         {children}
-        <PwaPrompt url={process.env.URL as string} />
         <Toaster />
       </body>
     </html>
