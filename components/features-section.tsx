@@ -3,15 +3,15 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
-import surveyImage from "@/assets/survey.png";
-import surveyResultImage from "@/assets/surveyResult.png";
-import carbonImage from "@/assets/carbon.png";
-import chartImage from "@/assets/chart.png";
-import challengesImage from "@/assets/challenges.png";
-import challengesPage from "@/assets/challengesPage.png";
-import rankingImage from "@/assets/ranking.png";
-import chatImage from "@/assets/aichat.png";
-import chatImage2 from "@/assets/aichat2.png";
+import surveyImage from "@/public/survey.png";
+import surveyResultImage from "@/public/surveyResult.png";
+import carbonImage from "@/public/carbon.png";
+import chartImage from "@/public/chart.png";
+import challengesImage from "@/public/challenges.png";
+import challengesPage from "@/public/challengesPage.png";
+import rankingImage from "@/public/ranking.png";
+import chatImage from "@/public/aichat.png";
+import chatImage2 from "@/public/aichat2.png";
 
 export default function FeaturesSection() {
   const features = [

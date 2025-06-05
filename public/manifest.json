@@ -1,0 +1,21 @@
+{
+  "name": "Reclimate",
+  "short_name": "Reclimate",
+  "icons": [
+    {
+      "src": "favicon-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "favicon-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/app",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "#071311",
+  "background_color": "#071311"
+}

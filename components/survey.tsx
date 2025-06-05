@@ -68,7 +68,7 @@ export default function AppSurvey({
     } else {
       onFinish();
     }
-  }, [questionIndex, questions.length, answers, onFinish, questions]);
+  }, [questionIndex, answers, onFinish, questions]);
 
   const decrementQuestionIndex = useCallback(() => {
     if (questionIndex > 0) {

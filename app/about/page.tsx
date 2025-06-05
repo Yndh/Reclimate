@@ -1,11 +1,11 @@
 import { Navbar } from "@/components/navbar";
 import Image, { StaticImageData } from "next/image";
-import nextLogo from "@/assets/nextLogo.png";
-import reactLogo from "@/assets/reactLogo.png";
-import gptLogo from "@/assets/gptLogo.png";
-import authLogo from "@/assets/authLogo.png";
-import prismaLogo from "@/assets/prismaLogo.png";
-import tailwindLogo from "@/assets/tailwindLogo.png";
+import nextLogo from "@/public/nextLogo.png";
+import reactLogo from "@/public/reactLogo.png";
+import gptLogo from "@/public/gptLogo.png";
+import authLogo from "@/public/authLogo.png";
+import prismaLogo from "@/public/prismaLogo.png";
+import tailwindLogo from "@/public/tailwindLogo.png";
 
 interface Question {
   title: string;

@@ -153,9 +153,11 @@ export function AppChallengesTable({ challenges }: AppChallengesTableProps) {
   const table = useReactTable({
     data,
     columns,
-    onSortingChange: React.useCallback(setSorting, []),
-    onColumnVisibilityChange: React.useCallback(setColumnVisibility, []),
-    onRowSelectionChange: React.useCallback(setRowSelection, []),
+    onSortingChange: React.useCallback(setSorting, [setSorting]),
+    onColumnVisibilityChange: React.useCallback(setColumnVisibility, [
+      setColumnVisibility,
+    ]),
+    onRowSelectionChange: React.useCallback(setRowSelection, [setRowSelection]),
     getCoreRowModel: React.useMemo(() => getCoreRowModel(), []),
     getPaginationRowModel: React.useMemo(() => getPaginationRowModel(), []),
     getSortedRowModel: React.useMemo(() => getSortedRowModel(), []),

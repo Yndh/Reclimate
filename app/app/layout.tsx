@@ -20,15 +20,15 @@ export default function Layout({
       <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
         <SidebarProvider>
           <AppSidebar />
-          <main className="!relative flex flex-col w-full h-screen pb-5 box-border overflow-y-hidden mt-10">
-            <div className="flex justify-between items-center p-2 fixed top-0 px-4">
+          <main className="!relative flex flex-col w-full h-screen pb-5 box-border overflow-y-hidden z-10 mt-10">
+            <div className="flex justify-between items-center p-2 fixed top-0 px-4 bg-background w-full">
               <div className="flex items-center gap-2 relative">
                 <SidebarTrigger />
                 <Separator orientation="vertical" className="h-[15px] mr-2" />
                 <AppBreadcrumb />
               </div>
             </div>
-            <div className="fixed right-0 top-0 p-2 px-4">
+            <div className="fixed right-0 top-0 p-2 px-4 z-20">
               <ModeToggle />
             </div>
             <Suspense>{children}</Suspense>

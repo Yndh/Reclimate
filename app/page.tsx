@@ -1,7 +1,7 @@
 import { ContainerScroll } from "@/components/ui/container-scroll-animation";
 import Image from "next/image";
-import dashboard from "@/assets/dashboard.png";
-import mobileDashboard from "@/assets/mobileDashboard.png";
+import dashboard from "@/public/dashboard.png";
+import mobileDashboard from "@/public/mobileDashboard.png";
 import { Navbar } from "@/components/navbar";
 import {
   Card,
