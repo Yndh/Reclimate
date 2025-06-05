@@ -5,7 +5,7 @@ import { Button } from "./ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { AppChat, MessageState } from "./app-chat";
 import { PopoverClose } from "@radix-ui/react-popover";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Chat } from "@/lib/types";
 import { usePathname } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
@@ -28,39 +28,36 @@ export const ChatPopup = () => {
     }
   }, [pathname]);
 
-  const fetchChat = async () => {
+  const fetchChat = useCallback(async () => {
     if (!isFetching) {
       return;
     }
 
     try {
-      await fetch("/api/chats", {
+      const res = await fetch("/api/chats", {
         method: "POST",
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.error) {
-            toast({
-              variant: "destructive",
-              description: data.error,
-            });
-            return;
-          }
+      });
+      const data = await res.json();
 
-          if (data.chat) {
-            const resChat: Chat = data.chat;
-            const newMessages: MessageState[] = resChat.messages.map(
-              (message) => ({
-                text: message.text,
-                sender: message.sender,
-              })
-            );
-            setId(resChat.id);
-            setChat(newMessages);
-            setIsFetching(false);
-            setChatTitle(resChat.title as string);
-          }
+      if (data.error) {
+        toast({
+          variant: "destructive",
+          description: data.error,
         });
+        return;
+      }
+
+      if (data.chat) {
+        const resChat: Chat = data.chat;
+        const newMessages: MessageState[] = resChat.messages.map((message) => ({
+          text: message.text,
+          sender: message.sender,
+        }));
+        setId(resChat.id);
+        setChat(newMessages);
+        setIsFetching(false);
+        setChatTitle(resChat.title || "");
+      }
     } catch (err) {
       console.error(`Error fetching chat: ${err}`);
       toast({
@@ -68,7 +65,7 @@ export const ChatPopup = () => {
         description: "Wystąpił błąd w trakcie pobierania czatu",
       });
     }
-  };
+  }, [isFetching]);
 
   if (isVisible) {
     return (
@@ -80,14 +77,14 @@ export const ChatPopup = () => {
             onClick={fetchChat}
           >
             <span className="w-full h-full bg-bgStart rounded-full">
-              <span className="flex items-center justify-center gap-2 w-full h-full bg-card backdrop-blur-[8px] text-foreground hover:text-white rounded-full px-3 py-2">
+              <span className="flex items-center justify-center gap-2 w-full h-full bg-bgStart duration-300 backdrop-blur-[8px] text-foreground hover:text-white rounded-full px-3 py-2">
                 <SparklesIcon />
               </span>
             </span>
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="bottom-0 right-0 z-20 w-fit translate-y-[70px] mr-3"
+          className="bottom-0 right-0 z-20 w-fit max-h-full translate-y-[70px] mr-3"
           side="top"
         >
           <div className="w-full h-fit flex justify-between items-center">
@@ -104,7 +101,7 @@ export const ChatPopup = () => {
           </div>
           <div className="h-[700px] w-[300px] md:w-[400px] mt-2">
             <AppChat
-              title={chatTitle as string}
+              title={chatTitle}
               messages={chat}
               setMessages={setChat}
               id={id}
@@ -115,4 +112,6 @@ export const ChatPopup = () => {
       </Popover>
     );
   }
+
+  return null;
 };

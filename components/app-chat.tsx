@@ -9,6 +9,8 @@ import React from "react";
 import ReactMarkdown from "react-markdown";
 import { Timer } from "./timer";
 import { toast } from "@/hooks/use-toast";
+import remarkGfm from "remark-gfm";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
 
 export interface MessageState {
   text: string;
@@ -183,19 +185,43 @@ export const AppChat = ({
         key={`message-${index}`}
       >
         {message.sender === Sender.ASSISTANT && (
-          <span className="w-[40px] h-[40px] aspect-square rounded-full flex items-center justify-center bg-muted">
-            🤖
-          </span>
+          <HoverCard>
+            <HoverCardTrigger asChild>
+              <span className="w-[40px] h-[40px] aspect-square rounded-full flex items-center justify-center bg-muted select-none cursor-pointer">
+                🤖
+              </span>
+            </HoverCardTrigger>
+            <HoverCardContent className="w-80">
+              <div className="flex justify-between space-x-4">
+                <span className="w-[40px] h-[40px] aspect-square rounded-full flex items-center justify-center bg-muted select-none cursor-pointer">
+                  🤖
+                </span>
+                <div className="space-y-4 w-full">
+                  <div>
+                    <h4 className="text-sm font-semibold">
+                      Asysten Ekologiczny
+                    </h4>
+                    <div className="flex items-center pt-2">
+                      <span className="text-xs text-muted-foreground">
+                        Twój ekologiczny asystent - zapytaj, jak żyć bardziej
+                        zielono!
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </HoverCardContent>
+          </HoverCard>
         )}
         <div
-          className={`h-fit space-y-2 min-w-[100px] max-w-[400px] mt-1 rounded-xl p-2 ${
+          className={`h-fit space-y-2 min-w-[100px] max-w-[450px] mt-1 rounded-xl p-2 ${
             message.sender === Sender.USER
               ? "bg-popover border backdrop-blur-[8px] shadow"
               : ""
           }`}
         >
           <div
-            className={`text-wrap ${
+            className={`prose text-wrap ${
               message.sender === Sender.ASSISTANT &&
               index === currentChatMessages.length - 1 &&
               isNewAssistantMessage
@@ -204,7 +230,9 @@ export const AppChat = ({
             }`}
             onAnimationEnd={() => setIsNewAssistantMessage(false)}
           >
-            <ReactMarkdown>{message.text}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]} className="prose">
+              {message.text.replace(/\\n/g, "\n")}
+            </ReactMarkdown>
           </div>
         </div>
       </div>
@@ -227,11 +255,11 @@ export const AppChat = ({
 
   return (
     <div className="relative flex flex-col items-center gap-10 w-full h-full">
-      <div className="w-full flex justify-center items-center text-lg font-medium">
+      <div className="w-full flex justify-center items-center text-lg font-semibold">
         {isFetching && !isLoading ? (
           <Skeleton className="w-[120px] h-[14px] " />
         ) : (
-          <h1 className="text-center">{chatTitle}</h1>
+          <h1 className="text-center text-xl">{chatTitle}</h1>
         )}
       </div>
       <div
@@ -248,9 +276,33 @@ export const AppChat = ({
               </div>
             </div>
             <div className="flex items-start justify-start gap-4 w-full">
-              <span className="w-[40px] h-[40px] aspect-square rounded-full flex items-center justify-center bg-muted">
-                🤖
-              </span>
+              <HoverCard>
+                <HoverCardTrigger asChild>
+                  <span className="w-[40px] h-[40px] aspect-square rounded-full flex items-center justify-center bg-muted select-none cursor-pointer">
+                    🤖
+                  </span>
+                </HoverCardTrigger>
+                <HoverCardContent className="w-80">
+                  <div className="flex justify-between space-x-4">
+                    <span className="w-[40px] h-[40px] aspect-square rounded-full flex items-center justify-center bg-muted select-none cursor-pointer">
+                      🤖
+                    </span>
+                    <div className="space-y-4 w-full">
+                      <div>
+                        <h4 className="text-sm font-semibold">
+                          Asysten Ekologiczny
+                        </h4>
+                        <div className="flex items-center pt-2">
+                          <span className="text-xs text-muted-foreground">
+                            Twój ekologiczny asystent - zapytaj, jak żyć
+                            bardziej zielono!
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </HoverCardContent>
+              </HoverCard>
               <div className="h-fit space-y-2 max-w-[200px] mt-1">
                 <Skeleton className="w-[200px] h-[14px]" />
                 <Skeleton className="w-[200px] h-[14px]" />
@@ -277,9 +329,33 @@ export const AppChat = ({
             )}
             {isLoading && (
               <div className="flex items-start justify-start gap-4 w-full">
-                <span className="w-[40px] h-[40px] aspect-square rounded-full flex items-center justify-center bg-muted">
-                  🤖
-                </span>
+                <HoverCard>
+                  <HoverCardTrigger asChild>
+                    <span className="w-[40px] h-[40px] aspect-square rounded-full flex items-center justify-center bg-muted select-none cursor-pointer">
+                      🤖
+                    </span>
+                  </HoverCardTrigger>
+                  <HoverCardContent className="w-80">
+                    <div className="flex justify-between space-x-4">
+                      <span className="w-[40px] h-[40px] aspect-square rounded-full flex items-center justify-center bg-muted select-none cursor-pointer">
+                        🤖
+                      </span>
+                      <div className="space-y-4 w-full">
+                        <div>
+                          <h4 className="text-sm font-semibold">
+                            Asysten Ekologiczny
+                          </h4>
+                          <div className="flex items-center pt-2">
+                            <span className="text-xs text-muted-foreground">
+                              Twój ekologiczny asystent - zapytaj, jak żyć
+                              bardziej zielono!
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </HoverCardContent>
+                </HoverCard>
                 <div className="h-fit space-y-2 max-w-[200px] mt-1">
                   <Skeleton className="w-[200px] h-[14px] gradient-animation" />
                   <Skeleton className="w-[200px] h-[14px] gradient-animation" />
@@ -291,36 +367,42 @@ export const AppChat = ({
         )}
       </div>
 
-      <div className="w-full flex flex-row items-center mb-4 gap-2 relative">
-        {refreshTime && (
-          <div className="w-full h-full absolute top-0 left-0 flex items-center justify-center backdrop-blur-[2px] z-40 text-muted-foreground">
-            <Timer targetDate={refreshTime} setData={setRefreshTime} />
-          </div>
-        )}
-        <Input
-          value={messageInput}
-          onChange={(e) => setMessageInput(e.target.value)}
-          className={`p-6 rounded-full pr-20 ${
-            messageInput.trim().length > 400 ? "border-red-700" : ""
-          }`}
-          onKeyDown={handleKeyDown}
-          placeholder="Wpisz wiadomość..."
-          disabled={isFetching || isLoading || refreshTime !== null}
-        />
-        <span className="text-sm text-muted-foreground outline-none absolute right-20">
-          {messageInput.trim().length}/400
+      <div className="w-full flex flex-col justify-center items-center">
+        <div className="w-full flex flex-row items-center mb-4 gap-2 relative">
+          {refreshTime && (
+            <div className="w-full h-full absolute top-0 left-0 flex items-center justify-center backdrop-blur-[2px] z-40 text-muted-foreground">
+              <Timer targetDate={refreshTime} setData={setRefreshTime} />
+            </div>
+          )}
+          <Input
+            value={messageInput}
+            onChange={(e) => setMessageInput(e.target.value)}
+            className={`p-6 rounded-full pr-20 outline-none ${
+              messageInput.trim().length > 400 ? "border-red-700" : ""
+            }`}
+            onKeyDown={handleKeyDown}
+            placeholder="Wpisz wiadomość..."
+            disabled={isFetching || isLoading || refreshTime !== null}
+          />
+          <span className="text-sm text-muted-foreground outline-none absolute right-20">
+            {messageInput.trim().length}/400
+          </span>
+          <button
+            className="aspect-square rounded-full w-[50px] h-[50px] p-2 flex items-center justify-center hover:bg-accent duration-300"
+            onClick={sendMessage}
+            disabled={
+              isLoading ||
+              refreshTime !== null ||
+              messageInput.trim().length === 0
+            }
+          >
+            <SendHorizonal size={24} />
+          </button>
+        </div>
+        <span className="text-xs text-muted-foreground text-center">
+          Asystent może popełniać błędy. Pamietaj by weryfikować ważne
+          informacje.
         </span>
-        <button
-          className="aspect-square rounded-full w-[50px] h-[50px] p-2 flex items-center justify-center hover:bg-accent duration-300"
-          onClick={sendMessage}
-          disabled={
-            isLoading ||
-            refreshTime !== null ||
-            messageInput.trim().length === 0
-          }
-        >
-          <SendHorizonal size={24} />
-        </button>
       </div>
     </div>
   );

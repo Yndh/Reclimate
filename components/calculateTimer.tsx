@@ -1,7 +1,6 @@
 "use client";
 
-import React from "react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
 import { SparklesIcon } from "lucide-react";
@@ -12,50 +11,44 @@ interface TimerProps {
 
 export const CalculateTimer = React.memo(({ targetDate }: TimerProps) => {
   const [completeLeft, setCompleteLeft] = useState<string | null>(null);
+  const [isButtonEnabled, setIsButtonEnabled] = useState(false);
   const router = useRouter();
 
-  useEffect(() => {
-    const updateCountdown = () => {
-      const now = new Date();
+  const updateCountdown = useCallback(() => {
+    const now = new Date();
+    const completeRemaining = targetDate.getTime() - now.getTime();
 
-      const completeDate = new Date(
-        targetDate.getTime() - 1 * 24 * 60 * 60 * 1000
+    if (completeRemaining > 0) {
+      const days = Math.floor(completeRemaining / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((completeRemaining / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor(
+        (completeRemaining % (1000 * 60 * 60)) / (1000 * 60)
       );
-      const completeRemaining = completeDate.getTime() - now.getTime();
+      const seconds = Math.floor((completeRemaining % (1000 * 60)) / 1000);
 
-      if (completeRemaining > 0) {
-        const days = Math.floor(completeRemaining / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((completeRemaining / (1000 * 60 * 60)) % 24);
-        const minutes = Math.floor(
-          (completeRemaining % (1000 * 60 * 60)) / (1000 * 60)
-        );
-        const seconds = Math.floor((completeRemaining % (1000 * 60)) / 1000);
+      setCompleteLeft(
+        `${days.toString().padStart(2, "0")}:${hours
+          .toString()
+          .padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds
+          .toString()
+          .padStart(2, "0")}`
+      );
+      setIsButtonEnabled(false);
+    } else {
+      setCompleteLeft("00:00:00:00");
+      setIsButtonEnabled(true);
+    }
+  }, [targetDate]);
 
-        setCompleteLeft(
-          `${days.toString().padStart(2, "0")}:${hours
-            .toString()
-            .padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds
-            .toString()
-            .padStart(2, "0")}`
-        );
-      } else {
-        setCompleteLeft(null);
-      }
-    };
-
+  useEffect(() => {
     updateCountdown();
     const interval = setInterval(updateCountdown, 1000);
-
     return () => clearInterval(interval);
-  }, [targetDate]);
+  }, [updateCountdown]);
 
   return (
     <div>
-      {completeLeft ? (
-        <Button variant={"outline"} disabled>
-          {completeLeft}
-        </Button>
-      ) : (
+      {isButtonEnabled ? (
         <Button
           className="hover-gradient-border p-0"
           variant={"outline"}
@@ -70,8 +63,13 @@ export const CalculateTimer = React.memo(({ targetDate }: TimerProps) => {
             </span>
           </span>
         </Button>
+      ) : (
+        <Button variant={"outline"} disabled>
+          {completeLeft}
+        </Button>
       )}
     </div>
   );
 });
+
 CalculateTimer.displayName = "CalculateTimer";

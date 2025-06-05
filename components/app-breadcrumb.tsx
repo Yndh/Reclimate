@@ -33,7 +33,7 @@ export const AppBreadcrumb = () => {
           </>
         ) : (
           segments.map((segment, index) => {
-            const href = `/app/${segments.slice(0, index + 1).join("/")}`;
+            const href = `/${segments.slice(0, index + 1).join("/")}`;
 
             return (
               <React.Fragment key={`frag${index}`}>

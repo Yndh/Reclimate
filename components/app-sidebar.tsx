@@ -34,6 +34,7 @@ import {
   LucideProps,
   ChevronRight,
   SparklesIcon,
+  Calculator,
 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import { redirect, usePathname, useRouter } from "next/navigation";
@@ -68,7 +69,7 @@ interface NavItem {
   icon: ForwardRefExoticComponent<
     Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>
   >;
-  items?: CollapsibleItem[];
+  items?: CollapsibleItem[] | ChatGroup[];
 }
 
 interface CollapsibleItem {
@@ -76,6 +77,124 @@ interface CollapsibleItem {
   title: string;
   url: string;
 }
+
+interface ChatGroup {
+  label: string;
+  chats: CollapsibleItem[];
+}
+
+const isSameDay = (d1: Date, d2: Date) =>
+  d1.getFullYear() === d2.getFullYear() &&
+  d1.getMonth() === d2.getMonth() &&
+  d1.getDate() === d2.getDate();
+
+const isSameWeek = (d1: Date, d2: Date) => {
+  const startOfWeek1 = new Date(d1);
+  startOfWeek1.setDate(
+    d1.getDate() - (d1.getDay() === 0 ? 6 : d1.getDay() - 1)
+  );
+  startOfWeek1.setHours(0, 0, 0, 0);
+
+  const startOfWeek2 = new Date(d2);
+  startOfWeek2.setDate(
+    d2.getDate() - (d2.getDay() === 0 ? 6 : d2.getDay() - 1)
+  );
+  startOfWeek2.setHours(0, 0, 0, 0);
+
+  return startOfWeek1.getTime() === startOfWeek2.getTime();
+};
+
+const isSameMonth = (d1: Date, d2: Date) =>
+  d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth();
+
+const categorizeChatsByDate = (
+  chats: { id: string; title: string; createdAt: string }[]
+): ChatGroup[] => {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+
+  const finalCategories: Record<string, CollapsibleItem[]> = {
+    today: [],
+    yesterday: [],
+    lastWeek: [],
+    lastMonth: [],
+  };
+
+  const finalMonthGroups: Record<string, CollapsibleItem[]> = {};
+
+  // Sort chats by createdAt in descending order (most recent first)
+  chats.sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+
+  chats.forEach((chat) => {
+    const chatDate = new Date(chat.createdAt);
+    const item: CollapsibleItem = {
+      id: chat.id,
+      title: chat.title,
+      url: `/app/assistant/${chat.id}`,
+    };
+
+    if (isSameDay(chatDate, now)) {
+      finalCategories.today.push(item);
+    } else if (isSameDay(chatDate, yesterday)) {
+      finalCategories.yesterday.push(item);
+    } else if (isSameWeek(chatDate, now)) {
+      // Add to lastWeek only if not already in today or yesterday
+      if (!isSameDay(chatDate, today) && !isSameDay(chatDate, yesterday)) {
+        finalCategories.lastWeek.push(item);
+      }
+    } else if (isSameMonth(chatDate, now)) {
+      // Add to lastMonth only if not already in this week (including today/yesterday)
+      if (!isSameWeek(chatDate, now)) {
+        finalCategories.lastMonth.push(item);
+      }
+    } else {
+      const monthYearKey = new Intl.DateTimeFormat("pl-PL", {
+        year: "numeric",
+        month: "long",
+      }).format(chatDate);
+      if (!finalMonthGroups[monthYearKey]) {
+        finalMonthGroups[monthYearKey] = [];
+      }
+      finalMonthGroups[monthYearKey].push(item);
+    }
+  });
+
+  const result: ChatGroup[] = [];
+
+  if (finalCategories.today.length > 0) {
+    result.push({ label: "Dziś", chats: finalCategories.today });
+  }
+  if (finalCategories.yesterday.length > 0) {
+    result.push({ label: "Wczoraj", chats: finalCategories.yesterday });
+  }
+  if (finalCategories.lastWeek.length > 0) {
+    result.push({ label: "Ostatni Tydzień", chats: finalCategories.lastWeek });
+  }
+  if (finalCategories.lastMonth.length > 0) {
+    result.push({ label: "Ostatni Miesiąc", chats: finalCategories.lastMonth });
+  }
+
+  const sortedMonthKeys = Object.keys(finalMonthGroups).sort((a, b) => {
+    const parseMonthYear = (key: string) => {
+      const [monthName, yearStr] = key.split(" ");
+      const monthIndex = new Date(
+        Date.parse(monthName + " 1, 2000")
+      ).getMonth();
+      return new Date(parseInt(yearStr), monthIndex, 1);
+    };
+    return parseMonthYear(a).getTime() - parseMonthYear(b).getTime();
+  });
+
+  sortedMonthKeys.forEach((key) => {
+    result.push({ label: key, chats: finalMonthGroups[key] });
+  });
+
+  return result;
+};
 
 const initNavItems: NavItems[] = [
   {
@@ -101,6 +220,11 @@ const initNavItems: NavItems[] = [
         url: "/app/assistant",
         items: [],
         icon: Sparkles,
+      },
+      {
+        title: "Kalkulator śladu",
+        url: "/calculate",
+        icon: Calculator,
       },
     ],
   },
@@ -163,15 +287,16 @@ export function AppSidebar() {
                 ...section,
                 items: section.items.map((item) => {
                   if (item.title.toLocaleLowerCase() === "asystent") {
+                    const categorizedChats = categorizeChatsByDate(
+                      data.chats as {
+                        id: string;
+                        title: string;
+                        createdAt: string;
+                      }[]
+                    );
                     return {
                       ...item,
-                      items: data.chats.map(
-                        (chat: { id: string; title: string }) => ({
-                          id: chat.id,
-                          title: chat.title,
-                          url: `/app/assistant/${chat.id}`,
-                        })
-                      ),
+                      items: categorizedChats,
                     };
                   }
                   return item;
@@ -249,20 +374,56 @@ export function AppSidebar() {
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
                     <CollapsibleContent>
-                      <SidebarMenuSub>
-                        {subItem.items?.map((nestedItem) => (
-                          <SidebarMenuSubItem
-                            key={`subitem-${nestedItem.id || nestedItem.title}`}
-                          >
-                            <Link
-                              href={nestedItem.url}
-                              prefetch={false}
-                              className="w-full"
+                      <SidebarMenuSub className="gap-1">
+                        {subItem.title.toLocaleLowerCase() === "asystent" ? (
+                          (subItem.items as ChatGroup[]).map((group) => (
+                            <div
+                              key={`chat-group-${group.label}`}
+                              className="mb-2"
                             >
-                              {nestedItem.title ?? nestedItem.id}
-                            </Link>
-                          </SidebarMenuSubItem>
-                        ))}
+                              <span className="py-2 text-xs font-semibold text-muted-foreground block">
+                                {group.label}
+                              </span>
+                              <div className="overflow-y-auto max-h-40">
+                                {group.chats.map((nestedItem) => (
+                                  <SidebarMenuSubItem
+                                    key={`subitem-${
+                                      nestedItem.id || nestedItem.title
+                                    }`}
+                                  >
+                                    <Link
+                                      href={nestedItem.url}
+                                      prefetch={false}
+                                      className="w-full text-muted-foreground text-xs"
+                                    >
+                                      {nestedItem.title || nestedItem.id}
+                                    </Link>
+                                  </SidebarMenuSubItem>
+                                ))}
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="overflow-y-scroll max-h-80">
+                            {(subItem.items as CollapsibleItem[])?.map(
+                              (nestedItem) => (
+                                <SidebarMenuSubItem
+                                  key={`subitem-${
+                                    nestedItem.id || nestedItem.title
+                                  }`}
+                                >
+                                  <Link
+                                    href={nestedItem.url}
+                                    prefetch={false}
+                                    className="w-full text-muted-foreground text-xs"
+                                  >
+                                    {nestedItem.title ?? nestedItem.id}
+                                  </Link>
+                                </SidebarMenuSubItem>
+                              )
+                            )}
+                          </div>
+                        )}
                         {subItem.title.toLocaleLowerCase() === "asystent" && (
                           <SidebarMenuSubItem key={`new-chat-button`}>
                             <Button
@@ -312,14 +473,16 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton className="h-fit">
-              <Image
-                src={theme === "light" ? logoLight : logo}
-                alt={`logo`}
-                width={40}
-                height={40}
-                className="border-[1px] rounded-md border-border aspect-square"
-              />
-              <span className="text-xl font-semibold">Reclimate</span>
+              <Link href={"/app"} className="flex gap-2 items-center">
+                <Image
+                  src={theme === "light" ? logoLight : logo}
+                  alt={`logo`}
+                  width={40}
+                  height={40}
+                  className="border-[1px] rounded-md border-border aspect-square"
+                />
+                <span className="text-xl font-semibold">Reclimate</span>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

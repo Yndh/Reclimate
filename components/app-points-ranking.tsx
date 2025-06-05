@@ -168,7 +168,10 @@ export const columns: ColumnDef<Leaderboard>[] = [
       return (
         <div className="font-medium">
           <HoverCard>
-            <HoverCardTrigger asChild className="hover:underline">
+            <HoverCardTrigger
+              asChild
+              className="hover:underline cursor-pointer"
+            >
               <span>{name}</span>
             </HoverCardTrigger>
             <HoverCardContent className="w-80">

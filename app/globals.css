@@ -22,7 +22,7 @@ body {
     --bg-start: #69b4a04d;
     --bg-end: 168, 25%, 92%;
     --foreground: 0 0% 3.9%;
-    --card: 168, 25%, 92%, 0.2;
+    --card: 168, 25%, 92%, 0.1;
     --card-foreground: 0 0% 3.9%;
     --popover: 170 46% 90%;
     --popover-foreground: 0 0% 3.9%;

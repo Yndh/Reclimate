@@ -21,6 +21,7 @@ import { Survey, User } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CalculateTimer } from "@/components/calculateTimer";
 import { toast } from "@/hooks/use-toast";
+import CountUp from "@/components/ui/count";
 
 const chartConfig = {
   footprint: {
@@ -150,7 +151,7 @@ export default function CarbonPage() {
         <Card className="order-2 md:order-1 lg:col-span-2">
           <CardHeader>
             <CardTitle>Postęp Śladu Węglowego</CardTitle>
-            <CardDescription>
+            <CardDescription className="capitalize">
               {formattedLowestDate} - {formattedHighestDate}
             </CardDescription>
           </CardHeader>
@@ -232,12 +233,20 @@ export default function CarbonPage() {
             <CardContent>
               {userLoading ? (
                 <Skeleton className="w-[80px] h-[30px]" />
-              ) : (
+              ) : userData?.carbonFootprint != null ? (
                 <p className="text-xl font-bold">
-                  {userData?.carbonFootprint != null
-                    ? `${userData.carbonFootprint}t CO₂`
-                    : "N/A"}
+                  <CountUp
+                    from={0}
+                    to={userData.carbonFootprint}
+                    separator=","
+                    direction="up"
+                    duration={0.01}
+                    className="text-2xl font-bold"
+                  />
+                  t CO₂
                 </p>
+              ) : (
+                <p className="text-xl font-bold">N/A</p>
               )}
             </CardContent>
           </Card>

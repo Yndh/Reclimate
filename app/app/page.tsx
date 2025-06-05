@@ -37,6 +37,7 @@ import { CompleteTimer } from "@/components/completeTimer";
 import { Timer } from "@/components/timer";
 import { toast } from "@/hooks/use-toast";
 import { useRouter, useSearchParams } from "next/navigation";
+import CountUp from "@/components/ui/count";
 
 const chartConfig = {
   footprint: {
@@ -220,7 +221,15 @@ export default function AppPage() {
             <CardContent>
               {userData?.carbonFootprint != null ? (
                 <p className="text-2xl font-bold">
-                  {userData.carbonFootprint}t CO₂
+                  <CountUp
+                    from={0}
+                    to={userData.carbonFootprint}
+                    separator=","
+                    direction="up"
+                    duration={0.01}
+                    className="text-2xl font-bold"
+                  />
+                  t CO₂
                 </p>
               ) : (
                 <Skeleton className="w-[80px] h-[30px]" />
@@ -235,7 +244,14 @@ export default function AppPage() {
             </CardHeader>
             <CardContent>
               {userData?.points != null ? (
-                <p className="text-2xl font-bold">{userData.points}</p>
+                <CountUp
+                  from={0}
+                  to={userData.points}
+                  separator=","
+                  direction="up"
+                  duration={0.1}
+                  className="text-2xl font-bold"
+                />
               ) : (
                 <Skeleton className="w-[80px] h-[30px]" />
               )}
@@ -302,7 +318,7 @@ export default function AppPage() {
           <Card className="md:col-span-1 lg:col-span-2">
             <CardHeader>
               <CardTitle>Postęp Śladu Węglowego</CardTitle>
-              <CardDescription>
+              <CardDescription className="capitalize">
                 {formattedLowestDate} - {formattedHighestDate}
               </CardDescription>
             </CardHeader>

@@ -21,6 +21,7 @@ import { AppChallengesTable } from "@/components/app-challenges-table";
 import { Timer } from "@/components/timer";
 import { CompleteTimer } from "@/components/completeTimer";
 import { toast } from "@/hooks/use-toast";
+import CountUp from "@/components/ui/count";
 
 const getWeekStartAndEnd = (): { start: Date; end: Date } => {
   const now = new Date();
@@ -219,9 +220,12 @@ export default function CarbonPage() {
                 ))}
               </>
             ) : (
-              <p className="text-center text-muted-foreground">
-                Brak zadań na ten tydzień.
-              </p>
+              <div className="w-full h-full flex justify-center items-center">
+                <p className="text-center text-muted-foreground">
+                  Nie udało się załadować wyzwań na ten tydzień.
+                </p>
+                <Button onClick={fetchUser}>Spróbuj ponownie</Button>
+              </div>
             )}
           </CardContent>
         </Card>
@@ -235,8 +239,17 @@ export default function CarbonPage() {
             <CardContent>
               {loading ? (
                 <Skeleton className="w-[30px] h-[30px]" />
+              ) : userData?.points != null ? (
+                <CountUp
+                  from={0}
+                  to={userData.points}
+                  separator=","
+                  direction="up"
+                  duration={0.1}
+                  className="text-2xl font-bold"
+                />
               ) : (
-                <p className="text-xl font-bold">
+                <p className="text-2xl font-bold">
                   {userData?.points != null ? userData.points : "N/A"}
                 </p>
               )}
