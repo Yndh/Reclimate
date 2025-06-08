@@ -145,6 +145,15 @@ export default function CarbonPage() {
     }));
   }, [chartData]);
 
+  const newestSurveys = useMemo(() => {
+    return (userData?.surveys ?? [])
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      )
+      .slice(0, 15);
+  }, [userData?.surveys]);
+
   return (
     <div className="overflow-y-scroll w-full h-full p-8">
       <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-4 ">
@@ -256,7 +265,7 @@ export default function CarbonPage() {
         {userLoading ? (
           <Skeleton className="w-full h-[300px]" />
         ) : (
-          <AppTable surveys={userData?.surveys ?? []} />
+          <AppTable surveys={newestSurveys} />
         )}
       </div>
     </div>

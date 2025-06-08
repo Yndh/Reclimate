@@ -23,14 +23,14 @@ export default function Layout({
         <SidebarProvider>
           <AppSidebar />
           <main className="!relative flex flex-col w-full h-screen box-border !overflow-y-hidden z-10 pt-14">
-            <div className="flex justify-between items-center p-2 fixed top-0 px-4 w-full z-50">
+            <div className="flex justify-between items-center p-2 fixed top-0 px-4 w-full z-40">
               <div className="flex items-center gap-2 relative">
                 <SidebarTrigger />
                 <Separator orientation="vertical" className="h-[15px] mr-2" />
                 <AppBreadcrumb />
               </div>
             </div>
-            <div className="fixed right-0 top-0 p-2 px-4 z-20">
+            <div className="fixed right-0 top-0 p-2 px-4 z-50">
               <ModeToggle />
             </div>
             <Suspense>{children}</Suspense>
