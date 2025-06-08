@@ -42,7 +42,6 @@ export type ChallengeData = {
 };
 
 const names = {
-  id: "Id",
   durationDate: "Czas trwania",
   title: "Tytuł",
   points: "Punkty",
@@ -61,11 +60,6 @@ const formatChallengeDate = (date: Date) => {
 };
 
 export const columns: ColumnDef<ChallengeData>[] = [
-  {
-    accessorKey: "id",
-    header: "Id",
-    cell: ({ row }) => <div className="capitalize">{row.getValue("id")}</div>,
-  },
   {
     accessorKey: "durationDate",
     header: ({ column }) => (
@@ -118,7 +112,7 @@ export const columns: ColumnDef<ChallengeData>[] = [
     accessorKey: "isCompleted",
     header: () => <div>Ukończone</div>,
     cell: ({ row }) => (
-      <div className="flex justify-center font-medium">
+      <div className="flex justify-start font-medium">
         {row.getValue("isCompleted") ? (
           <CheckCircle2 className="text-green-700" />
         ) : (
@@ -169,7 +163,6 @@ export function AppChallengesTable({ challenges }: AppChallengesTableProps) {
     },
   });
 
-  // Memoize pagination handlers
   const handlePreviousPage = React.useCallback(
     () => table.previousPage(),
     [table]
@@ -249,7 +242,7 @@ export function AppChallengesTable({ challenges }: AppChallengesTableProps) {
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  Brak wyników.
                 </TableCell>
               </TableRow>
             )}
@@ -258,7 +251,7 @@ export function AppChallengesTable({ challenges }: AppChallengesTableProps) {
       </div>
       <div className="flex items-center justify-end space-x-2 py-4">
         <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
+          Wybrano {table.getFilteredSelectedRowModel().rows.length} z{" "}
           {table.getFilteredRowModel().rows.length} wiersz(y).
         </div>
         <div className="space-x-2">
@@ -268,7 +261,7 @@ export function AppChallengesTable({ challenges }: AppChallengesTableProps) {
             onClick={handlePreviousPage}
             disabled={!table.getCanPreviousPage()}
           >
-            Previous
+            Poprzednia
           </Button>
           <Button
             variant="outline"
@@ -276,7 +269,7 @@ export function AppChallengesTable({ challenges }: AppChallengesTableProps) {
             onClick={handleNextPage}
             disabled={!table.getCanNextPage()}
           >
-            Next
+            Następna
           </Button>
         </div>
       </div>

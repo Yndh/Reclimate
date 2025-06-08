@@ -3,16 +3,10 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { AppBlob } from "@/components/app-blob";
 import { Toaster } from "@/components/ui/toaster";
+import { Inter } from "next/font/google";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
+const inter = Inter({
+  subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
@@ -44,9 +38,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth dark">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased  h-screen`}
-      >
+      <body className={`${inter.className} antialiased  h-screen`}>
         <AppBlob x={200} y={-100} />
         <AppBlob x={-300} y={0} bottom />
         <AppBlob side="right" x={10} y={10} bottom />

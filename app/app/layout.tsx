@@ -4,6 +4,7 @@ import { AppBreadcrumb } from "@/components/app-breadcrumb";
 import { ChatPopup } from "@/components/app-chat-popup";
 import { PwaPrompt } from "@/components/app-pwa-prompt";
 import { AppSidebar } from "@/components/app-sidebar";
+import { SurveyPrefetch } from "@/components/app-surver-prefetch";
 import { ModeToggle } from "@/components/app-theme-toggle";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Separator } from "@/components/ui/separator";
@@ -21,8 +22,8 @@ export default function Layout({
       <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
         <SidebarProvider>
           <AppSidebar />
-          <main className="!relative flex flex-col w-full h-screen pb-5 box-border overflow-y-hidden z-10 mt-10">
-            <div className="flex justify-between items-center p-2 fixed top-0 px-4 bg-background w-full">
+          <main className="!relative flex flex-col w-full h-screen box-border !overflow-y-hidden z-10 pt-14">
+            <div className="flex justify-between items-center p-2 fixed top-0 px-4 w-full z-50">
               <div className="flex items-center gap-2 relative">
                 <SidebarTrigger />
                 <Separator orientation="vertical" className="h-[15px] mr-2" />
@@ -36,6 +37,7 @@ export default function Layout({
             <ChatPopup />
           </main>
           <PwaPrompt />
+          <SurveyPrefetch />
         </SidebarProvider>
       </ThemeProvider>
     </SessionProvider>

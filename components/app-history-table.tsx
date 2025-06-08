@@ -39,18 +39,12 @@ export type SurveyData = {
 };
 
 const names = {
-  id: "Id",
   createdAt: "Data ankiety",
   questions: "Pytania",
   carbonFootprint: "Ślad węglowy",
 };
 
 export const columns: ColumnDef<SurveyData>[] = [
-  {
-    accessorKey: "id",
-    header: "Id",
-    cell: ({ row }) => <div className="capitalize">{row.getValue("id")}</div>,
-  },
   {
     accessorKey: "createdAt",
     header: ({ column }) => (

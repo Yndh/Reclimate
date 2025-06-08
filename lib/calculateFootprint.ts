@@ -20,7 +20,7 @@ export const calculateFootprint = async (
         {
           role: "system",
           content:
-            "Na podstawie poniższych odpowiedzi na pytania, ocen roczny slad weglowy i daj kilka porad.",
+            "Na podstawie poniższych odpowiedzi oceń szacunkowy roczny ślad węglowy użytkownika (w tonach CO₂) oraz zaproponuj 3-5 praktycznych porad, jak może go zmniejszyć. Uwzględnij najważniejsze obszary wpływu (transport, jedzenie, energia itp.) i podaj wskazówki dopasowane do stylu życia przedstawionego w odpowiedziach.",
         },
         { role: "user", content: JSON.stringify(answers) },
       ],

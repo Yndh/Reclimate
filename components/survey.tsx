@@ -83,7 +83,7 @@ export default function AppSurvey({
     questionIndex === questions.length - 1 ? "Zakończ" : "Następne";
 
   return (
-    <Card className="w-full h-fit md:h-1/2 md:w-1/2">
+    <Card className="w-full h-fit md:min-h-1/2 md:w-1/2">
       <CardHeader>
         <CardTitle>Pytanie {questionIndex + 1}</CardTitle>
       </CardHeader>

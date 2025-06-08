@@ -124,7 +124,6 @@ const categorizeChatsByDate = (
 
   const finalMonthGroups: Record<string, CollapsibleItem[]> = {};
 
-  // Sort chats by createdAt in descending order (most recent first)
   chats.sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
@@ -142,12 +141,10 @@ const categorizeChatsByDate = (
     } else if (isSameDay(chatDate, yesterday)) {
       finalCategories.yesterday.push(item);
     } else if (isSameWeek(chatDate, now)) {
-      // Add to lastWeek only if not already in today or yesterday
       if (!isSameDay(chatDate, today) && !isSameDay(chatDate, yesterday)) {
         finalCategories.lastWeek.push(item);
       }
     } else if (isSameMonth(chatDate, now)) {
-      // Add to lastMonth only if not already in this week (including today/yesterday)
       if (!isSameWeek(chatDate, now)) {
         finalCategories.lastMonth.push(item);
       }
@@ -521,7 +518,7 @@ export function AppSidebar() {
                     <span className="truncate font-semibold">
                       {session?.user?.name as string}
                     </span>
-                    <span className="truncate text-xs">
+                    <span className="truncate text-xs text-muted-foreground">
                       {session?.user?.email as string}
                     </span>
                   </div>

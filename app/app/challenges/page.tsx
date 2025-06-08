@@ -234,7 +234,7 @@ export default function CarbonPage() {
           <Card>
             <CardHeader>
               <CardTitle>Punkty</CardTitle>
-              <CardDescription>Ilość punktów</CardDescription>
+              <CardDescription>Twoje aktualne punkty.</CardDescription>
             </CardHeader>
             <CardContent>
               {loading ? (
@@ -260,7 +260,7 @@ export default function CarbonPage() {
             <CardHeader>
               <CardTitle>Nowe wyzwania</CardTitle>
               <CardDescription>
-                Ile czasu zostało do otrzymania nowych wyzwań tygodniowych
+                Ile czasu zostało do nowych wyzwań tygodniowych.
               </CardDescription>
             </CardHeader>
             <CardContent className="text-2xl font-bold">

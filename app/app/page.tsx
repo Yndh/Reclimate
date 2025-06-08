@@ -240,7 +240,7 @@ export default function AppPage() {
           <Card>
             <CardHeader>
               <CardTitle>Punkty</CardTitle>
-              <CardDescription>Ilość punktów</CardDescription>
+              <CardDescription>Twoje aktualne punkty.</CardDescription>
             </CardHeader>
             <CardContent>
               {userData?.points != null ? (
@@ -262,7 +262,7 @@ export default function AppPage() {
             <CardHeader>
               <CardTitle>Porady</CardTitle>
               <CardDescription>
-                Porady aby zmniejszyć swój ślad węglowy
+                Sprawdź praktyczne wskazówki, na podstawie ostatniej ankiety.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -277,15 +277,15 @@ export default function AppPage() {
                         }
                       }}
                     >
-                      Pokaż porady
+                      Zobacz porady
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>Porady</DialogTitle>
+                      <DialogTitle>Twoje porady</DialogTitle>
                       <DialogDescription>
-                        Porady do obnizenia śladu węglowego na podstawie twojej
-                        ostatniej ankiety
+                        Twoje spersonalizowane porady, jak zmniejszyć ślad
+                        węglowy — oparte na Twoich ostatnich odpowiedziach.
                       </DialogDescription>
                     </DialogHeader>
                     <div className="w-full box-border">
@@ -293,7 +293,7 @@ export default function AppPage() {
                         {latestSurveyTips &&
                           latestSurveyTips.map((tip, index) => (
                             <li
-                              className={`text-sm ${
+                              className={`text-base ${
                                 tipsClick < 2
                                   ? "gradient-text duration-1000"
                                   : ""
@@ -397,7 +397,13 @@ export default function AppPage() {
                     <PopoverTrigger asChild>
                       <Button variant="ghost" className="h-fit mb-4">
                         <div className="flex align-top justify-start gap-4 h-fit w-full m-0">
-                          <p className="text-sm text-white font-bold bg-green-700 rounded-full aspect-square w-12 h-12 flex items-center justify-center">
+                          <p
+                            className={`text-sm text-white font-bol rounded-full aspect-square w-12 h-12 flex items-center justify-center ${
+                              challenge.isCompleted
+                                ? "bg-green-950"
+                                : "bg-green-700"
+                            }`}
+                          >
                             {challenge.isCompleted ? (
                               <Check />
                             ) : (

@@ -4,7 +4,7 @@ import AppSurvey from "@/components/survey";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Survey } from "@/lib/types";
-import { ChevronRight, Sparkles } from "lucide-react";
+import { ChevronRight, Clock, Sparkles } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback, useMemo } from "react";
@@ -166,41 +166,49 @@ export default function NewUserPage() {
   return (
     <div className="flex items-center justify-center w-full h-full">
       {step === 0 && (
-        <Card className="w-full h-fit md:h-1/2 md:w-1/2">
+        <Card className="w-full h-fit md:min-h-1/2 md:w-1/2">
           <CardHeader>
             <CardTitle>Wprowadzenie</CardTitle>
           </CardHeader>
-          <CardContent className="flex flex-col justify-center items-center text-center gap-2 h-2/3">
+          <CardContent className="flex flex-col justify-center items-center text-center gap-2 min-h-2/3">
             {isQuestionsLoading ? (
               <>
                 <Skeleton className="w-[200px] h-[20px] mb-2 rounded-full" />
                 <Skeleton className="w-full h-[20px] rounded-full" />
                 <Skeleton className="w-full h-[20px] rounded-full" />
                 <Skeleton className="w-full h-[20px] rounded-full" />
+                <Skeleton className="w-full h-[20px] rounded-full" />
+                <Skeleton className="w-full h-[20px] rounded-full" />
+                <div className="w-full mx-5 flex justify-end">
+                  <Skeleton className="w-[100px] h-[20px] rounded-full" />
+                </div>
                 <Skeleton className="w-[200px] h-[20px] mt-4 rounded-full" />
               </>
             ) : (
               <>
-                <h2 className="text-xl font-bold">
-                  Witaj, {session?.user?.name || "Użytkowniku"}!{" "}
+                <h2 className="text-2xl font-bold">
+                  👋 Witaj, {session?.user?.name || "Użytkowniku"}!{" "}
                 </h2>
-                <p className="text-base text-muted-foreground">
-                  &quot;Reclimate&quot; to innowacyjna aplikacja, która pomaga
-                  użytkownikom zrozumieć wpływ ich stylu życia na środowisko.
-                  Dzięki interaktywnym narzędziom zwiększamy świadomość
-                  ekologiczną i pomagamy w podejmowaniu bardziej zrównoważonych
-                  decyzji.
+                <p className="text-lg px-10">
+                  &quot;Reclimate&quot; to aplikacja, która pomoże Ci zrozumieć
+                  wpływ twoich codziennych wyborów na środowisko. Dzięki
+                  interaktywnym narzędziom wspiera w podejmowaniu bardziej
+                  świadomych decyzji.
                 </p>
-                <p className="text-base text-muted-foreground">
-                  Aby rozpocząć, musisz wypełnić ankietę, która składa się z
-                  serii pytań dotyczących Twojego stylu życia. Na podstawie
-                  Twoich odpowiedzi oszacujemy Twój ślad węglowy oraz
-                  zaproponujemy konkretne rekomendacje dotyczące bardziej
-                  ekologicznych wyborów.
+                <p className="text-lg px-10">
+                  Wypełnij krótką ankietę dotyczącą Twojego stylu życia a
+                  obliczymy Twój przybliżony ślad węglowy i pomożemy ci go
+                  obniżyć!
+                </p>
+                <p className="w-full flex justify-end items-center gap-1 mx-5 text-right text-muted-foreground text-sm font-semibold">
+                  <Clock /> To zajmie tylko 1-5min
                 </p>
 
-                <Button className="mt-4" onClick={nextStep}>
-                  Wypełnij ankietę <ChevronRight className="ml-2 h-4 w-4" />
+                <Button
+                  className="mt-4 px-10 py-5 !font-medium text-base"
+                  onClick={nextStep}
+                >
+                  Dalej
                 </Button>
               </>
             )}
@@ -213,19 +221,26 @@ export default function NewUserPage() {
             <CardTitle>Wprowadzenie</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col justify-center items-center text-center gap-2 h-2/3">
-            <h2 className="text-xl font-bold">Na czym to polega?</h2>
-            <p className="text-base text-muted-foreground">
-              Ankieta składa się z serii pytań dotyczących Twojego stylu życia.
-              Na podstawie Twoich odpowiedzi oszacujemy Twój ślad węglowy oraz
-              zaproponujemy konkretne rekomendacje dotyczące bardziej
-              ekologicznych wyborów.
+            <h2 className="text-2xl font-bold">🌎 Sprawdź swój ślad węglowy</h2>
+            <p className="text-lg px-10">
+              Odpowiedz na kilka krótkich pytań dotyczących twoich codziennych
+              nawyków. Na tej podstawie obliczymy Twój przybliżony ślad węglowy
+              i podpowiemy, co możesz zrobić aby zyć bardziej ekologicznie.
             </p>
-            <p className="w-full mx-5 text-right text-muted-foreground text-sm">
-              Czas trwania: 5-10min
+            <p className="text-lg px-10 ">
+              Ankieta jest prosta i intuicyjna - pytania dotyczą twoich nawyków
+              i są dopasowywane pod Ciebie. Po jej wypełnieniu otrzymasz wynik
+              wraz z wskazówkami dopasowanymi do Twojego stylu życia.
+            </p>
+            <p className="w-full flex justify-end items-center gap-1 mx-5 text-right text-muted-foreground text-sm font-semibold">
+              <Clock /> To zajmie tylko 1-5min
             </p>
 
-            <Button className="mt-4" onClick={nextStep}>
-              Rozpocznij
+            <Button
+              className="mt-4 px-10 py-5 !font-medium text-base"
+              onClick={nextStep}
+            >
+              Rozpocznij ankietę
             </Button>
           </CardContent>
         </Card>

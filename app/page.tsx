@@ -60,18 +60,18 @@ const faqData: { question: string; answer: string }[] = [
 
 export default function Home() {
   return (
-    <div className="flex flex-col items-center overflow-y-auto gap-24 px-4 lg:px-64 scroll-smooth">
+    <div className="flex flex-col items-center overflow-y-auto gap-24 px-8 lg:px-64 scroll-smooth">
       <Navbar />
 
       <div className="w-full h-fit flex flex-col items-center justify-center mt-40 md:mt-5">
         <ContainerScroll
           titleComponent={
             <>
-              <h1 className="flex flex-col text-center text-xl md:text-4xl font-semibold">
+              <p className="text-center text-2xl lg:text-4xl font-semibold text-muted-foreground">
                 Zrób pierwszy krok dla planety
-                <span className="text-4xl md:text-[6rem] font-bold mt-1 leading-none">
-                  Zmieniaj nawyki z pomocą AI!
-                </span>
+              </p>
+              <h1 className="text-center text-4xl lg:text-8xl font-bold mb-5">
+                Zmieniaj nawyki z pomocą AI!
               </h1>
             </>
           }
@@ -93,7 +93,8 @@ export default function Home() {
         </ContainerScroll>
       </div>
 
-      <div className="flex flex-col items-center w-full text-center" id="about">
+      <div className="relative flex flex-col items-center w-full text-center">
+        <span className="absolute -translate-y-36" id="about" />
         <p className="text-sm text-muted-foreground font-semibold">
           Nasza misja
         </p>
@@ -142,7 +143,8 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="flex flex-col items-center w-full text-center" id="app">
+      <div className="flex flex-col items-center w-full text-center">
+        <span className="absolute -translate-y-36" id="app" />
         <p className="text-sm text-muted-foreground font-semibold">Funkcje</p>
         <h2 className="text-4xl font-semibold pb-2">Jak działa Reclimate?</h2>
         <p className="text-muted-foreground text-base w-[400px]">
@@ -152,7 +154,8 @@ export default function Home() {
         <FeaturesSection />
       </div>
 
-      <div className="flex flex-col items-center w-full text-center" id="faq">
+      <div className="flex flex-col items-center w-full text-center">
+        <span className="absolute -translate-y-36" id="faq" />
         <p className="text-sm text-muted-foreground font-semibold">FAQ</p>
         <h2 className="text-4xl font-semibold pb-2">
           Masz pytania? Oto odpowiedzi!
@@ -171,7 +174,8 @@ export default function Home() {
         </Accordion>
       </div>
 
-      <div className="flex flex-col items-center w-full text-center" id="join">
+      <div className="flex flex-col items-center w-full text-center">
+        <span className="absolute -translate-y-36" id="join" />
         <p className="text-sm text-muted-foreground font-semibold">
           Dołącz teraz
         </p>

@@ -1,11 +1,10 @@
-"use client";
-
-import { AppBreadcrumb } from "@/components/app-breadcrumb";
-import { AppSidebar } from "@/components/app-sidebar";
 import { ModeToggle } from "@/components/app-theme-toggle";
-import { ThemeProvider } from "@/components/theme-provider";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { Metadata } from "next";
 import { SessionProvider } from "next-auth/react";
+
+export const metadata: Metadata = {
+  title: "Reclimate | Ankieta",
+};
 
 export default function Layout({
   children,
@@ -15,7 +14,7 @@ export default function Layout({
   return (
     <SessionProvider>
       <main className="w-full h-screen overflow-hidden">
-        <div className="flex items-center justify-end p-2">
+        <div className="flex items-center justify-end w-full p-2 fixed ">
           <ModeToggle />
         </div>
         {children}

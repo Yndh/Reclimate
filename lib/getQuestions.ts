@@ -28,7 +28,7 @@ export const getQuestions = async (
           content: [
             {
               type: "text",
-              text: "Na podstawie poniższych pytań i odpowiedzi wygeneruj zestaw 10 pytań uzupełniających, które pomogą dokładniej ocenić ślad węglowy użytkownika. Każde pytanie powinno mieć 4 opcje odpowiedzi, zróżnicowane pod względem możliwego wpływu na ślad węglowy",
+              text: "Na podstawie poniższych odpowiedzi udzielonych w poprzedniej ankiecie wygeneruj 10 dodatkowych, uzupełniających pytań, które pomogą dokładniej oszacować roczny ślad węglowy użytkownika. Każde pytanie powinno: odnosić się do obszarów, które wynikają z wcześniejszych odpowiedzi i wymagają doprecyzowania, dotyczyć takich tematów jak transport, energia, jedzenie, zakupy czy inne aspekty stylu życia, zawierać 4 opcje odpowiedzi, zróżnicowane pod względem wpływu na emisję CO₂ (od najniższego do najwyższego), być sformułowane w prosty, przyjazny sposób, bez technicznego języka.",
             },
           ],
         },
