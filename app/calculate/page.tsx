@@ -181,27 +181,27 @@ export default function CalculatePage() {
               </>
             ) : (
               <>
-                <h2 className="text-2xl font-bold">
+                <h2 className="text-lg lg:text-2xl font-bold w-full">
                   🌎 Sprawdź swój ślad węglowy
                 </h2>
-                <p className="text-lg px-10">
+                <p className="text-sm lg:text-lg lg:px-10">
                   Odpowiedz na kilka krótkich pytań dotyczących twoich
                   codziennych nawyków. Na tej podstawie obliczymy Twój
                   przybliżony ślad węglowy i podpowiemy, co możesz zrobić aby
                   zyć bardziej ekologicznie.
                 </p>
-                <p className="text-lg px-10 ">
+                <p className="text-sm lg:text-lg lg:px-10 ">
                   Ankieta jest prosta i intuicyjna - pytania dotyczą twoich
                   nawyków i są dopasowywane pod Ciebie. Po jej wypełnieniu
                   otrzymasz wynik wraz z wskazówkami dopasowanymi do Twojego
                   stylu życia.
                 </p>
-                <p className="w-full flex justify-end items-center gap-1 mx-5 text-right text-muted-foreground text-sm font-semibold">
+                <p className="w-full flex justify-end items-center gap-1 mx-5 text-right text-muted-foreground text-xs lg:text-sm font-semibold">
                   <Clock /> To zajmie tylko 1-5min
                 </p>
 
                 <Button
-                  className="mt-4 px-10 py-5 !font-medium text-base"
+                  className="mt-4 px-10 py-5 !font-medium lg:text-base"
                   onClick={nextStep}
                 >
                   Rozpocznij ankietę
