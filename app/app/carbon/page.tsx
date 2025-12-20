@@ -36,8 +36,6 @@ interface ChartData {
 }
 
 export default function CarbonPage() {
-  const router = useRouter();
-
   const [refreshTime, setRefreshTime] = useState<Date | null>(null);
   const [cooldownLoading, setCooldownLoading] = useState(true);
   const [userData, setUserData] = useState<User | null>(null);
@@ -139,10 +137,12 @@ export default function CarbonPage() {
   const formattedHighestDate = formatDate(highestDate);
 
   const memoizedChartData = useMemo(() => {
-    return chartData.map((item) => ({
-      ...item,
-      date: item.date.toLocaleDateString("pl-PL"),
-    }));
+    return chartData
+      .map((item) => ({
+        ...item,
+        date: item.date.toLocaleDateString("pl-PL"),
+      }))
+      .slice(-15);
   }, [chartData]);
 
   const newestSurveys = useMemo(() => {
@@ -168,10 +168,7 @@ export default function CarbonPage() {
             {userLoading || chartData.length === 0 ? (
               <Skeleton className="max-h-[150px] w-full h-[150px]" />
             ) : (
-              <ChartContainer
-                config={chartConfig}
-                className="max-h-[150px] w-full"
-              >
+              <ChartContainer config={chartConfig} className=" w-full">
                 <LineChart
                   accessibilityLayer
                   data={memoizedChartData}

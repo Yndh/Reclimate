@@ -1,4 +1,6 @@
-import { OpenAi } from "./openai";
+import { generateObject } from "ai";
+import { google } from "@ai-sdk/google";
+import { z } from "zod";
 
 interface SurveyAnswers {
   question: string;
@@ -14,51 +16,32 @@ export const calculateFootprint = async (
   answers: SurveyAnswers[]
 ): Promise<FootprintResponse> => {
   try {
-    const response = await OpenAi.chat.completions.create({
-      model: "gpt-4o-mini",
+    const { object } = await generateObject({
+      model: google("gemini-2.5-flash-lite"),
+      schema: z.object({
+        footprint: z
+          .number()
+          .describe("A numeric representation of the footprint in tons."),
+        tips: z
+          .array(z.string())
+          .describe("An array of tips related to the footprint."),
+      }),
       messages: [
         {
           role: "system",
           content:
             "Na podstawie poniższych odpowiedzi oceń szacunkowy roczny ślad węglowy użytkownika (w tonach CO₂) oraz zaproponuj 3-5 praktycznych porad, jak może go zmniejszyć. Uwzględnij najważniejsze obszary wpływu (transport, jedzenie, energia itp.) i podaj wskazówki dopasowane do stylu życia przedstawionego w odpowiedziach.",
         },
-        { role: "user", content: JSON.stringify(answers) },
-      ],
-      temperature: 1,
-      max_completion_tokens: 250,
-      response_format: {
-        type: "json_schema",
-        json_schema: {
-          name: "footprint_schema",
-          strict: true,
-          schema: {
-            type: "object",
-            properties: {
-              footprint: {
-                type: "number",
-                description:
-                  "A numeric representation of the footprint in tons.",
-              },
-              tips: {
-                type: "array",
-                description: "An array of tips related to the footprint.",
-                items: {
-                  type: "string",
-                },
-              },
-            },
-            required: ["footprint", "tips"],
-            additionalProperties: false,
-          },
+        {
+          role: "user",
+          content: JSON.stringify(answers),
         },
-      },
+      ],
     });
 
-    const res = JSON.parse(response.choices[0].message.content as string);
-
     return {
-      footprint: res.footprint ?? 0,
-      tips: res.tips || [],
+      footprint: object.footprint ?? 0,
+      tips: object.tips || [],
     };
   } catch (err) {
     console.error(`Error calculating footprint: ${err}`);

@@ -69,12 +69,13 @@ export async function mPOST(req: Request, res: ResponseInterface) {
     );
   }
 
-  const completeDate = new Date(target.getTime() - 1 * 24 * 60 * 60 * 1000);
+  const completeDate = new Date(target.getTime() - 2 * 24 * 60 * 60 * 1000);
   const completeTimeLeft = completeDate.getTime() - now.getTime();
+
   if (completeTimeLeft > 0) {
     return new NextResponse(
       JSON.stringify({
-        error: "Nie możesz jeszcze zaaktualizować tego wydarzenia",
+        error: "Nie możesz jeszcze zaaktualizować tego wyzwania.",
       }),
       {
         status: 403,

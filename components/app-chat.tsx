@@ -181,7 +181,7 @@ export const AppChat = ({
       <div
         className={`flex items-start justify-${
           message.sender === Sender.USER ? "end" : "start"
-        } gap-4 w-full`}
+        } gap-4 w-full h-full`}
         key={`message-${index}`}
       >
         {message.sender === Sender.ASSISTANT && (

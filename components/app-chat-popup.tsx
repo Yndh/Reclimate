@@ -84,7 +84,7 @@ export const ChatPopup = () => {
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="bottom-0 right-0 z-20 w-fit max-h-full translate-y-[70px] mr-3"
+          className="bottom-0 right-0 z-20 w-screen md:w-fit translate-y-[70px] mr-3 max-h-screen relative"
           side="top"
         >
           <div className="w-full h-fit flex justify-between items-center">
@@ -99,7 +99,7 @@ export const ChatPopup = () => {
               </Button>
             </PopoverClose>
           </div>
-          <div className="h-[700px] w-[300px] md:w-[400px] mt-2">
+          <div className="h-[90vh] md:h-[600px] w-full md:w-[300px] mt-2">
             <AppChat
               title={chatTitle}
               messages={chat}
