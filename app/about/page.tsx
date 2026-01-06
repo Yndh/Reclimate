@@ -2,7 +2,7 @@ import { Navbar } from "@/components/navbar";
 import Image, { StaticImageData } from "next/image";
 import nextLogo from "@/public/nextLogo.png";
 import reactLogo from "@/public/reactLogo.png";
-import gptLogo from "@/public/gptLogo.png";
+import geminiLogo from "@/public/geminiLogo.png";
 import authLogo from "@/public/authLogo.png";
 import prismaLogo from "@/public/prismaLogo.png";
 import tailwindLogo from "@/public/tailwindLogo.png";
@@ -34,8 +34,8 @@ const logos: techStack[] = [
     image: prismaLogo,
   },
   {
-    description: "GPT 4o-mini",
-    image: gptLogo,
+    description: "Gemini 2.5 Flash Lite",
+    image: geminiLogo,
   },
   {
     description: "Auth.js",

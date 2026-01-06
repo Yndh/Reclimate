@@ -38,7 +38,7 @@ Reclimate odpowiada na poważny problem, jakim jest niska świadomość o wpływ
 - **Next.js**
 - **Prisma ORM**
 - **Auth.js**
-- **GPT-4o mini**
+- **Gemini 2.5 Flash Lite**
 - **React**
 - **Tailwind CSS**
 
@@ -79,18 +79,18 @@ npm install
 
 ### 3. Konfiguracja pliku .env
 
-| Zmienna              | Typ    | Opis                                                                       |
-| -------------------- | ------ | -------------------------------------------------------------------------- |
-| `URL`                | string | Adres URL aplikacji (np http://localhost:3000).                            |
-| `SURVEY_COOLDOWN`    | number | Czas oczekiwania (cooldown) między wysłaniem ankiet, w godzinach.          |
-| `DAILY_TOKEN_LIMIT`  | number | Limit dziennego zużycia output tokenów przez użytkownika.                  |
-| `DATABASE_URL`       | string | URL połączenia z bazą danych (PostgreSQL).                                 |
-| `OPENAI_API_KEY`     | string | Klucz API do OpenAI.                                                       |
-| `AUTH_SECRET`        | string | Sekret służący do generowania i weryfikowania tokenów uwierzytelniających. |
-| `AUTH_GITHUB_ID`     | string | ID aplikacji GitHub, używane w procesie uwierzytelniania przez GitHub.     |
-| `AUTH_GITHUB_SECRET` | string | Sekret aplikacji GitHub, wymagany do autentykacji przez GitHub.            |
-| `AUTH_GOOGLE_ID`     | string | ID aplikacji Google, używane w procesie uwierzytelniania przez Google.     |
-| `AUTH_GOOGLE_SECRET` | string | Sekret aplikacji Google, wymagany do autentykacji przez Google.            |
+| Zmienna                        | Typ    | Opis                                                                       |
+| ------------------------------ | ------ | -------------------------------------------------------------------------- |
+| `URL`                          | string | Adres URL aplikacji (np http://localhost:3000).                            |
+| `SURVEY_COOLDOWN`              | number | Czas oczekiwania (cooldown) między wysłaniem ankiet, w godzinach.          |
+| `DAILY_TOKEN_LIMIT`            | number | Limit dziennego zużycia output tokenów przez użytkownika.                  |
+| `DATABASE_URL`                 | string | URL połączenia z bazą danych (PostgreSQL).                                 |
+| `GOOGLE_GENERATIVE_AI_API_KEY` | string | Klucz API do Google.                                                       |
+| `AUTH_SECRET`                  | string | Sekret służący do generowania i weryfikowania tokenów uwierzytelniających. |
+| `AUTH_GITHUB_ID`               | string | ID aplikacji GitHub, używane w procesie uwierzytelniania przez GitHub.     |
+| `AUTH_GITHUB_SECRET`           | string | Sekret aplikacji GitHub, wymagany do autentykacji przez GitHub.            |
+| `AUTH_GOOGLE_ID`               | string | ID aplikacji Google, używane w procesie uwierzytelniania przez Google.     |
+| `AUTH_GOOGLE_SECRET`           | string | Sekret aplikacji Google, wymagany do autentykacji przez Google.            |
 
 ### 4. Baza danych
 
